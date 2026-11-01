@@ -1,0 +1,8 @@
+/* Печать / сохранение билета в PDF: на странице остаётся только билет. */
+@page { size: A4 landscape; margin: 14mm; }
+html, body { background: #fff !important; }
+body * { visibility: hidden !important; }
+.grain, .site-header, .site-footer, .toasts, #modal-root { display: none !important; }
+#ticket-print, #ticket-print * { visibility: visible !important; }
+#ticket-print { position: absolute; left: 0; top: 0; width: 100%; animation: none !important; }
+.ticket { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-shadow: none !important; -webkit-mask: none !important; mask: none !important; break-inside: avoid; }
