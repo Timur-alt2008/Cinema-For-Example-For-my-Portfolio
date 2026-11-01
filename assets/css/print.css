@@ -1,4 +1,4 @@
-/* Печать / сохранение билета в PDF: на странице остаётся только билет. */
+/* Print / save ticket as PDF: only the ticket stays on the page. */
 @page { size: A4 landscape; margin: 14mm; }
 html, body { background: #fff !important; }
 body * { visibility: hidden !important; }

@@ -1,10 +1,10 @@
-// Общие элементы интерфейса: уведомления, модальные окна, появление при прокрутке,
-// аккордеоны, пустые состояния и скелетоны.
+// Shared UI: toasts, modals, scroll reveal, accordions,
+// empty states and skeletons.
 
 import { html, esc, $, $$, prefersReducedMotion } from '../lib/dom.js';
 import { icon } from '../icons.js';
 
-/* ------------------------------- Тосты -------------------------------- */
+/* ------------------------------- Toasts ------------------------------- */
 
 export function toast(title, { text = '', type = 'info', timeout = 4200, iconName } = {}) {
   const root = document.getElementById('toasts');
@@ -16,7 +16,7 @@ export function toast(title, { text = '', type = 'info', timeout = 4200, iconNam
   el.innerHTML = html`
     <span class="toast__icon">${icon(ic)}</span>
     <div><div class="toast__title">${esc(title)}</div>${text ? `<div class="toast__text">${esc(text)}</div>` : ''}</div>
-    <button class="toast__close" type="button" aria-label="Закрыть уведомление">${icon('close')}</button>`;
+    <button class="toast__close" type="button" aria-label="Dismiss notification">${icon('close')}</button>`;
   const close = () => {
     if (el.classList.contains('is-leaving')) return;
     el.classList.add('is-leaving');
@@ -29,13 +29,13 @@ export function toast(title, { text = '', type = 'info', timeout = 4200, iconNam
   return close;
 }
 
-/* ------------------------------- Модальные окна ----------------------- */
+/* ------------------------------- Modals ------------------------------- */
 
 let openModals = 0;
 
 /**
  * openModal({ title, body, footer, wide, onOpen, onClose, label })
- * body/footer — HTML-строки. Возвращает объект { el, close }.
+ * body/footer are HTML strings. Returns { el, close }.
  */
 export function openModal({ title = '', body = '', footer = '', wide = false, onOpen, onClose, label, dismissible = true } = {}) {
   const root = document.getElementById('modal-root');
@@ -44,10 +44,10 @@ export function openModal({ title = '', body = '', footer = '', wide = false, on
   el.className = `modal${wide ? ' modal--wide' : ''}`;
   el.innerHTML = html`
     <div class="modal__backdrop" data-close></div>
-    <div class="modal__dialog" role="dialog" aria-modal="true" aria-label="${esc(label || title || 'Окно')}" tabindex="-1">
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-label="${esc(label || title || 'Dialog')}" tabindex="-1">
       ${title || dismissible ? html`<div class="modal__head">
         <h2 class="modal__title">${title}</h2>
-        ${dismissible ? `<button class="icon-btn modal__close" type="button" data-close aria-label="Закрыть">${icon('close')}</button>` : ''}
+        ${dismissible ? `<button class="icon-btn modal__close" type="button" data-close aria-label="Close">${icon('close')}</button>` : ''}
       </div>` : ''}
       <div class="modal__body">${body}</div>
       ${footer ? `<div class="modal__foot">${footer}</div>` : ''}
@@ -100,7 +100,7 @@ export function openModal({ title = '', body = '', footer = '', wide = false, on
   return api;
 }
 
-export function confirmDialog({ title, text, confirm = 'Подтвердить', cancel = 'Отмена', danger = false }) {
+export function confirmDialog({ title, text, confirm = 'Confirm', cancel = 'Cancel', danger = false }) {
   return new Promise((resolve) => {
     let result = false;
     const m = openModal({
@@ -119,7 +119,7 @@ export function confirmDialog({ title, text, confirm = 'Подтвердить',
   });
 }
 
-/* ------------------------------- Появление при прокрутке -------------- */
+/* ------------------------------- Scroll reveal ------------------------ */
 
 let observer;
 export function observeReveal(root = document) {
@@ -141,7 +141,7 @@ export function observeReveal(root = document) {
   items.forEach((el) => observer.observe(el));
 }
 
-/* ------------------------------- Аккордеон ----------------------------- */
+/* ------------------------------- Accordion ---------------------------- */
 
 export function accordion(items, { open = 0 } = {}) {
   return html`<div class="accordion">${items.map((it, i) => html`
@@ -163,7 +163,7 @@ export function bindAccordion(root) {
   });
 }
 
-/* ------------------------------- Состояния ----------------------------- */
+/* ------------------------------- States ------------------------------- */
 
 export function emptyState({ iconName = 'film', title, text = '', action = '' }) {
   return html`<div class="empty">
@@ -178,11 +178,11 @@ export function errorState(err, { retry = true } = {}) {
   const notFound = err?.status === 404;
   return html`<div class="wrap section"><div class="empty">
     <div class="empty__icon">${icon(notFound ? 'film' : 'alert')}</div>
-    <h3>${notFound ? 'Кадр не найден' : 'Плёнка оборвалась'}</h3>
-    <p>${esc(err?.message || 'Что-то пошло не так. Попробуйте обновить страницу.')}</p>
+    <h3>${notFound ? 'Scene not found' : 'The reel snapped'}</h3>
+    <p>${esc(err?.message || 'Something went wrong. Please try reloading the page.')}</p>
     <div class="chips" style="justify-content:center">
-      ${retry && !notFound ? `<button class="btn btn--primary" type="button" data-retry>${icon('reset')} Повторить</button>` : ''}
-      <a class="btn btn--ghost" href="#/afisha">${icon('film')} В афишу</a>
+      ${retry && !notFound ? `<button class="btn btn--primary" type="button" data-retry>${icon('reset')} Try again</button>` : ''}
+      <a class="btn btn--ghost" href="#/afisha">${icon('film')} Back to films</a>
     </div>
   </div></div>`;
 }
@@ -194,11 +194,11 @@ export function skeletonCards(n = 8) {
 
 export function starsView(rating, max = 5) {
   const full = Math.round(rating);
-  return `<span class="stars" aria-label="Оценка ${rating} из ${max}">${Array.from({ length: max }, (_, i) =>
+  return `<span class="stars" aria-label="Rated ${rating} out of ${max}">${Array.from({ length: max }, (_, i) =>
     `<span class="${i < full ? '' : 'off'}">${icon('star')}</span>`).join('')}</span>`;
 }
 
-/** Показывает ошибки полей формы. */
+/** Shows form field errors. */
 export function showFieldErrors(form, errors = {}) {
   $$('.field', form).forEach((f) => f.classList.remove('is-invalid'));
   Object.entries(errors).forEach(([name, message]) => {

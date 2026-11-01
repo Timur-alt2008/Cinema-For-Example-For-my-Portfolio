@@ -1,6 +1,6 @@
-// Генератор оригинальных кинопостеров в SVG.
-// Каждый фильм получает свою композицию (мотив), палитру и типографику.
-// Постеры векторные: чёткие на любом экране и ничего не весят.
+// Original SVG film poster generator.
+// Every film gets its own composition (motif), palette and typography.
+// Posters are vector: crisp on any screen and practically weightless.
 
 import { rng } from '../lib/rand.js';
 import { esc } from '../lib/dom.js';
@@ -9,7 +9,7 @@ let uid = 0;
 const W = 400;
 const H = 600;
 
-/* ------------------------------ помощники ------------------------------ */
+/* ------------------------------ helpers ------------------------------ */
 
 function figure(x, y, h, fill = '#050404', extra = '') {
   const t = y - h;
@@ -34,8 +34,8 @@ function stars(random, count, { x0 = 0, x1 = W, y0 = 0, y1 = H * 0.6, color = '#
   return out;
 }
 
-/* ------------------------------ мотивы ------------------------------ */
-// Каждый мотив рисуется в системе координат 400 × 600.
+/* ------------------------------ motifs ------------------------------ */
+// Every motif is drawn in a 400 × 600 coordinate space.
 
 const MOTIFS = {
   corridor({ id, a, l }) {
@@ -459,7 +459,7 @@ const MOTIFS = {
   },
 };
 
-/* ------------------------------ типографика ------------------------------ */
+/* ------------------------------ typography ------------------------------ */
 
 const FONT = {
   serif: { family: 'Cormorant Garamond, Georgia, serif', weight: 600, ratio: 0.66, spacing: 1, upper: true },
@@ -489,8 +489,8 @@ function titleBlock(film, withCast = true) {
   const size = Math.min(64, Math.max(26, 330 / (longest * f.ratio + longest * f.spacing / 40)));
   const lh = size * (film.art.titleFont === 'cond' ? 1.02 : 0.98);
   const baseY = 528 - (lines.length - 1) * lh;
-  const credit = `ФИЛЬМ ${film.director.toUpperCase()}`;
-  const cast = film.cast.slice(0, 2).map((c) => c.replace('Голоса: ', '').toUpperCase()).join('   ');
+  const credit = `A FILM BY ${film.director.toUpperCase()}`;
+  const cast = film.cast.slice(0, 2).map((c) => c.replace('Voices: ', '').toUpperCase()).join('   ');
   return `
     ${withCast ? `<text x="200" y="40" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="8.5" font-weight="700" letter-spacing="2.6" fill="#f2eeee" opacity="0.72" ${cast.length * 8 > 330 ? 'textLength="330" lengthAdjust="spacingAndGlyphs"' : ''}>${esc(cast)}</text>` : ''}
     <g font-family="${f.family}" font-weight="${f.weight}" text-anchor="middle" fill="#f4efea" letter-spacing="${f.spacing}">
@@ -532,7 +532,7 @@ function defs(id, film) {
 }
 
 /**
- * Постер фильма.
+ * Film poster.
  * @param {object} film
  * @param {{variant?: 'poster'|'wide', title?: boolean, className?: string, label?: boolean}} opts
  */
@@ -542,10 +542,10 @@ export function poster(film, { variant = 'poster', title = true, className = '',
   const random = rng(`poster|${film.id}`);
   const motif = MOTIFS[film.art.motif] || MOTIFS.corridor;
   const body = motif({ id, a: film.art.accent, l: film.art.light, r: random });
-  const aria = label ? `role="img" aria-label="Постер фильма «${esc(film.title)}»"` : 'aria-hidden="true"';
+  const aria = label ? `role="img" aria-label="Poster for ${esc(film.title)}"` : 'aria-hidden="true"';
 
   if (variant === 'wide') {
-    // Широкий кадр для главного баннера: мотив справа, атмосфера слева.
+    // Wide frame for the hero banner: motif on the right, atmosphere on the left.
     return `<svg class="poster poster--wide ${className}" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" ${aria}>
       ${defs(id, film)}
       <rect width="1600" height="900" fill="url(#${id}-bg)"/>

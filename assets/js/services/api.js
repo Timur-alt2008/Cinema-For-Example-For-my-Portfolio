@@ -1,13 +1,13 @@
-// Демонстрационный API кинотеатра.
+// Demo cinema API.
 //
-// Все функции асинхронные и возвращают данные в том виде, в каком их отдавал бы настоящий сервер.
-// Чтобы подключить backend, достаточно заменить тело функций на fetch() к REST/GraphQL —
-// страницы и компоненты при этом менять не придётся.
+// Every function is async and returns data shaped exactly as a real server would.
+// To plug in a backend, replace the function bodies with fetch() calls to REST/GraphQL —
+// pages and components don’t need to change.
 //
-// Пример:
+// Example:
 //   export async function getFilms(params) {
 //     const res = await fetch(`${API_URL}/films?` + new URLSearchParams(params));
-//     if (!res.ok) throw new ApiError('Не удалось загрузить афишу', res.status);
+//     if (!res.ok) throw new ApiError('Could not load the film list', res.status);
 //     return res.json();
 //   }
 
@@ -35,14 +35,14 @@ const latency = (min = 180, max = 520) =>
 
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
-/* ------------------------------- Фильмы ------------------------------- */
+/* ------------------------------- Films -------------------------------- */
 
 export function searchFilmsSync({ q = '', genre = 'all', sort = 'popular', collection = '' } = {}) {
   let list = FILMS.slice();
   const query = q.trim().toLowerCase();
   if (query) {
     list = list.filter((f) =>
-      [f.title, f.original, f.director, ...f.cast].join(' ').toLowerCase().includes(query)
+      [f.title, f.director, ...f.cast].join(' ').toLowerCase().includes(query)
     );
   }
   if (collection && COLLECTIONS[collection]) {
@@ -71,11 +71,11 @@ export async function getFilms(params = {}) {
 export async function getFilm(id) {
   await latency(120, 320);
   const film = getFilmById(id);
-  if (!film) throw new ApiError('Фильм не найден', 404);
+  if (!film) throw new ApiError('Film not found', 404);
   return film;
 }
 
-/* ------------------------------- Сеансы ------------------------------- */
+/* ------------------------------- Showtimes ---------------------------- */
 
 function enrich(session) {
   const film = getFilmById(session.filmId);
@@ -85,7 +85,7 @@ function enrich(session) {
 
 export async function getSchedule(date = todayISO()) {
   await latency(200, 450);
-  if (!scheduleDates().includes(date)) throw new ApiError('Расписание на эту дату ещё не опубликовано', 404);
+  if (!scheduleDates().includes(date)) throw new ApiError('The schedule for this date hasn’t been published yet', 404);
   return sessionsForDate(date).map(enrich);
 }
 
@@ -110,7 +110,7 @@ export function soldSeatsFromOrders(sessionId) {
 export async function getSessionDetails(sessionId) {
   await latency(220, 480);
   const session = findSession(sessionId);
-  if (!session) throw new ApiError('Сеанс не найден или уже снят с расписания', 404);
+  if (!session) throw new ApiError('Show not found or no longer scheduled', 404);
   const full = enrich(session);
   const occupied = seededOccupied(session);
   soldSeatsFromOrders(sessionId).forEach((id) => occupied.add(id));
@@ -125,28 +125,28 @@ export async function getSessionDetails(sessionId) {
   return { ...full, map, occupiedCount: occupied.size };
 }
 
-/* ------------------------------- Промокоды ---------------------------- */
+/* ------------------------------- Promo codes -------------------------- */
 
 export function checkPromo(code, { session, seatsCount }) {
   const key = String(code || '').trim().toUpperCase();
-  if (!key) throw new ApiError('Введите промокод', 400, 'promo');
+  if (!key) throw new ApiError('Enter a promo code', 400, 'promo');
   const promo = PROMO_CODES[key];
-  if (!promo) throw new ApiError('Такого промокода не существует', 400, 'promo');
+  if (!promo) throw new ApiError('This promo code doesn’t exist', 400, 'promo');
   if (promo.id === 'student') {
     const day = parseISO(session.date).getDay();
-    if (session.hallId === 'h3') throw new ApiError('Студенческая скидка не действует в VIP-зале', 400, 'promo');
-    if (day !== 2) throw new ApiError('Промокод действует только на сеансы во вторник', 400, 'promo');
+    if (session.hallId === 'h3') throw new ApiError('The student discount isn’t valid in the VIP room', 400, 'promo');
+    if (day !== 2) throw new ApiError('This code is valid for Tuesday shows only', 400, 'promo');
   }
   if (promo.id === 'family') {
-    if (seatsCount < 3) throw new ApiError('Семейный билет — от трёх мест в заказе', 400, 'promo');
-    if (session.start >= 17 * 60) throw new ApiError('Семейный билет действует на сеансы до 17:00', 400, 'promo');
+    if (seatsCount < 3) throw new ApiError('The Family Ticket needs at least three seats', 400, 'promo');
+    if (session.start >= 17 * 60) throw new ApiError('The Family Ticket is valid for shows before 5 pm', 400, 'promo');
   }
   if (promo.id === 'midnight' && session.start < 22 * 60 + 30) {
-    throw new ApiError('Промокод действует на сеансы после 22:30', 400, 'promo');
+    throw new ApiError('This code is valid for shows after 10:30 pm', 400, 'promo');
   }
   if (promo.id === 'vipdate') {
-    if (session.hallId !== 'h3') throw new ApiError('Промокод действует только в VIP-зале «Обскура»', 400, 'promo');
-    if (seatsCount < 2) throw new ApiError('Нужно выбрать минимум два места', 400, 'promo');
+    if (session.hallId !== 'h3') throw new ApiError('This code is valid in the Obscura VIP room only', 400, 'promo');
+    if (seatsCount < 2) throw new ApiError('Please select at least two seats', 400, 'promo');
   }
   return { code: key, percent: promo.percent, title: promo.title };
 }
@@ -157,7 +157,7 @@ export function calcTotals(seats, promo) {
   return { subtotal, discount, total: subtotal - discount };
 }
 
-/* ------------------------------- Заказы ------------------------------- */
+/* ------------------------------- Orders ------------------------------- */
 
 function orderNumber() {
   const random = rng(`${Date.now()}|${Math.random()}`);
@@ -171,31 +171,31 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function validateCustomer(c) {
   const errors = {};
-  if (!c.firstName || c.firstName.trim().length < 2) errors.firstName = 'Укажите имя';
-  if (!c.lastName || c.lastName.trim().length < 2) errors.lastName = 'Укажите фамилию';
-  if (!EMAIL_RE.test(String(c.email || '').trim())) errors.email = 'Проверьте адрес почты';
+  if (!c.firstName || c.firstName.trim().length < 2) errors.firstName = 'Enter your first name';
+  if (!c.lastName || c.lastName.trim().length < 2) errors.lastName = 'Enter your last name';
+  if (!EMAIL_RE.test(String(c.email || '').trim())) errors.email = 'Please check your email address';
   const digits = String(c.phone || '').replace(/\D/g, '');
-  if (digits.length < 10 || digits.length > 13) errors.phone = 'Номер телефона в формате +380 XX XXX XX XX';
+  if (digits.length < 10 || digits.length > 13) errors.phone = 'Enter a valid phone number, e.g. +380 67 123 45 67';
   return errors;
 }
 
 export async function createOrder({ sessionId, seatIds, customer, promoCode, mode, userId }) {
   await latency(900, 1500);
   const details = await getSessionDetails(sessionId);
-  if (details.sales === 'closed') throw new ApiError('Продажа билетов на этот сеанс уже закрыта', 409);
-  if (!seatIds?.length) throw new ApiError('Не выбрано ни одного места', 400);
+  if (details.sales === 'closed') throw new ApiError('Ticket sales for this show have closed', 409);
+  if (!seatIds?.length) throw new ApiError('No seats selected', 400);
 
   const seats = [];
   for (const id of seatIds) {
     const seat = details.map.flatMap((r) => r.seats).find((s) => s.id === id);
-    if (!seat) throw new ApiError('Одно из мест не найдено в схеме зала', 400);
-    if (seat.occupied) throw new ApiError(`Место ${seat.row} ряд, ${seat.num} уже купил другой зритель. Выберите другое место.`, 409);
+    if (!seat) throw new ApiError('One of the seats isn’t on the seating plan', 400);
+    if (seat.occupied) throw new ApiError(`Row ${seat.row}, seat ${seat.num} has just been taken. Please choose another seat.`, 409);
     seats.push({ id: seat.id, row: seat.row, num: seat.num, type: seat.type, price: seat.price });
   }
 
   const errors = validateCustomer(customer);
   if (Object.keys(errors).length) {
-    const err = new ApiError('Проверьте контактные данные', 422);
+    const err = new ApiError('Please check your contact details', 422);
     err.fields = errors;
     throw err;
   }
@@ -235,7 +235,7 @@ export async function createOrder({ sessionId, seatIds, customer, promoCode, mod
 export async function getOrder(id) {
   await latency(120, 300);
   const order = store.get('orders', []).find((o) => o.id === id);
-  if (!order) throw new ApiError('Заказ не найден на этом устройстве', 404);
+  if (!order) throw new ApiError('Order not found on this device', 404);
   return order;
 }
 
@@ -252,16 +252,16 @@ export async function cancelOrder(id) {
     if (o.id !== id) return o;
     const session = findSession(o.sessionId);
     if (session && (sessionDate(session) - new Date()) / 60000 < 60) {
-      throw new ApiError('Вернуть билет можно не позднее чем за 60 минут до сеанса', 409);
+      throw new ApiError('Tickets can be refunded up to 60 minutes before the show', 409);
     }
     found = { ...o, status: 'cancelled', cancelledAt: new Date().toISOString() };
     return found;
   }), []);
-  if (!found) throw new ApiError('Заказ не найден', 404);
+  if (!found) throw new ApiError('Order not found', 404);
   return found;
 }
 
-/* ------------------------------- Пользователи ------------------------- */
+/* ------------------------------- Users -------------------------------- */
 
 async function hashPassword(password, salt) {
   const text = `${salt}::${password}::cinema-example`;
@@ -270,7 +270,7 @@ async function hashPassword(password, salt) {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
       return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
     }
-  } catch (e) { /* небезопасный контекст — используем запасной хеш */ }
+  } catch (e) { /* insecure context — fall back to a simple hash */ }
   return `h${hashString(text).toString(16)}`;
 }
 
@@ -290,14 +290,14 @@ export function currentUser() {
 export async function register({ firstName, lastName, email, phone, password }) {
   await latency(500, 900);
   const errors = {};
-  if (!firstName || firstName.trim().length < 2) errors.firstName = 'Укажите имя';
-  if (!EMAIL_RE.test(String(email || '').trim())) errors.email = 'Проверьте адрес почты';
-  if (!password || password.length < 6) errors.password = 'Минимум 6 символов';
+  if (!firstName || firstName.trim().length < 2) errors.firstName = 'Enter your first name';
+  if (!EMAIL_RE.test(String(email || '').trim())) errors.email = 'Please check your email address';
+  if (!password || password.length < 6) errors.password = 'At least 6 characters';
   const users = store.get('users', []);
   const normalized = String(email || '').trim().toLowerCase();
-  if (users.some((u) => u.email === normalized)) errors.email = 'Пользователь с такой почтой уже зарегистрирован';
+  if (users.some((u) => u.email === normalized)) errors.email = 'An account with this email already exists';
   if (Object.keys(errors).length) {
-    const err = new ApiError('Проверьте данные формы', 422);
+    const err = new ApiError('Please check the form', 422);
     err.fields = errors;
     throw err;
   }
@@ -322,7 +322,7 @@ export async function login({ email, password }) {
   const normalized = String(email || '').trim().toLowerCase();
   const user = store.get('users', []).find((u) => u.email === normalized);
   if (!user || user.passHash !== (await hashPassword(password || '', normalized))) {
-    throw new ApiError('Неверная почта или пароль', 401);
+    throw new ApiError('Wrong email or password', 401);
   }
   store.set('auth', { userId: user.id, at: Date.now() });
   return publicUser(user);
@@ -335,10 +335,10 @@ export function logout() {
 export async function updateProfile(patch) {
   await latency(300, 600);
   const me = currentUser();
-  if (!me) throw new ApiError('Сессия истекла, войдите снова', 401);
+  if (!me) throw new ApiError('Your session has expired, please sign in again', 401);
   if (patch.email !== undefined && !EMAIL_RE.test(String(patch.email).trim())) {
-    const err = new ApiError('Проверьте данные', 422);
-    err.fields = { email: 'Проверьте адрес почты' };
+    const err = new ApiError('Please check your details', 422);
+    err.fields = { email: 'Please check your email address' };
     throw err;
   }
   let updated = null;
@@ -350,20 +350,20 @@ export async function updateProfile(patch) {
   return publicUser(updated);
 }
 
-/* ------------------------------- Отзывы ------------------------------- */
+/* ------------------------------- Reviews ------------------------------ */
 
-const REVIEW_NAMES = ['Анна', 'Виктор', 'Лиза', 'Артём', 'Софья', 'Игорь', 'Марта', 'Олег', 'Юлия', 'Роман', 'Катерина', 'Назар'];
+const REVIEW_NAMES = ['Anna', 'Victor', 'Liz', 'Artem', 'Sophie', 'Igor', 'Martha', 'Oleg', 'Julia', 'Roman', 'Kate', 'Nazar'];
 const REVIEW_TEXTS = {
   good: [
-    'Атмосфера держит до последней секунды. После сеанса долго сидели в тишине, пока шли титры.',
-    'Звук в зале — отдельный персонаж. Несколько раз ловила себя на том, что оборачиваюсь.',
-    'Очень красивый визуально фильм, каждый кадр можно ставить на постер.',
-    'Сценарий умнее, чем кажется по трейлеру. Финал обсуждали всю дорогу домой.',
-    'Смотрели в VIP — пледы и тишина в зале сделали своё дело. Рекомендую.',
+    'The atmosphere grips you until the very last second. We sat in silence all the way through the credits.',
+    'The sound in the room is a character of its own. I caught myself looking over my shoulder more than once.',
+    'A stunning-looking film — you could frame every shot as a poster.',
+    'Smarter than the trailer suggests. We argued about the ending all the way home.',
+    'Watched it in VIP — the blankets and the silence did their job. Recommended.',
   ],
   mid: [
-    'Середина немного провисает, но последние двадцать минут всё окупают.',
-    'Хорошая операторская работа, но хотелось бы чуть больше объяснений в финале.',
+    'The middle sags a little, but the last twenty minutes make up for it.',
+    'Great cinematography, though I wanted a bit more explanation at the end.',
   ],
 };
 
@@ -379,7 +379,7 @@ export async function getReviews(filmId) {
     const pool = good ? REVIEW_TEXTS.good : REVIEW_TEXTS.mid;
     return {
       id: `seed-${filmId}-${i}`,
-      name: `${REVIEW_NAMES[Math.floor(random() * REVIEW_NAMES.length)]} ${String.fromCharCode(1040 + Math.floor(random() * 28))}.`,
+      name: `${REVIEW_NAMES[Math.floor(random() * REVIEW_NAMES.length)]} ${String.fromCharCode(65 + Math.floor(random() * 26))}.`,
       rating: good ? (random() < 0.6 ? 5 : 4) : 3,
       text: pool[Math.floor(random() * pool.length)],
       date: null,
@@ -391,11 +391,11 @@ export async function getReviews(filmId) {
 export async function addReview(filmId, { name, rating, text }) {
   await latency(400, 700);
   const errors = {};
-  if (!name || name.trim().length < 2) errors.name = 'Представьтесь, пожалуйста';
-  if (!rating || rating < 1 || rating > 5) errors.rating = 'Поставьте оценку';
-  if (!text || text.trim().length < 10) errors.text = 'Минимум 10 символов';
+  if (!name || name.trim().length < 2) errors.name = 'Please tell us your name';
+  if (!rating || rating < 1 || rating > 5) errors.rating = 'Please choose a rating';
+  if (!text || text.trim().length < 10) errors.text = 'At least 10 characters';
   if (Object.keys(errors).length) {
-    const err = new ApiError('Проверьте форму отзыва', 422);
+    const err = new ApiError('Please check your review', 422);
     err.fields = errors;
     throw err;
   }
@@ -406,16 +406,16 @@ export async function addReview(filmId, { name, rating, text }) {
 
 export const homeReviews = () => REVIEWS;
 
-/* ------------------------------- Обратная связь ----------------------- */
+/* ------------------------------- Feedback ----------------------------- */
 
 export async function sendFeedback({ name, email, topic, message }) {
   await latency(700, 1200);
   const errors = {};
-  if (!name || name.trim().length < 2) errors.name = 'Укажите имя';
-  if (!EMAIL_RE.test(String(email || '').trim())) errors.email = 'Проверьте адрес почты';
-  if (!message || message.trim().length < 10) errors.message = 'Сообщение слишком короткое';
+  if (!name || name.trim().length < 2) errors.name = 'Enter your name';
+  if (!EMAIL_RE.test(String(email || '').trim())) errors.email = 'Please check your email address';
+  if (!message || message.trim().length < 10) errors.message = 'Your message is too short';
   if (Object.keys(errors).length) {
-    const err = new ApiError('Проверьте форму', 422);
+    const err = new ApiError('Please check the form', 422);
     err.fields = errors;
     throw err;
   }
@@ -426,7 +426,7 @@ export async function sendFeedback({ name, email, topic, message }) {
 
 export async function subscribeNews(email) {
   await latency(500, 800);
-  if (!EMAIL_RE.test(String(email || '').trim())) throw new ApiError('Проверьте адрес почты', 422, 'email');
+  if (!EMAIL_RE.test(String(email || '').trim())) throw new ApiError('Please check your email address', 422, 'email');
   store.update('newsletter', (list) => Array.from(new Set([...list, email.trim().toLowerCase()])), []);
   return true;
 }

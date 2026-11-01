@@ -1,4 +1,4 @@
-// Электронный билет: разметка для страницы, SVG-файл для скачивания и событие для календаря.
+// E-ticket: page markup, a downloadable SVG file and a calendar event.
 
 import { html, esc } from '../lib/dom.js';
 import { icon } from '../icons.js';
@@ -9,7 +9,7 @@ import { CINEMA } from '../data/site.js';
 import { poster } from './poster.js';
 import { formatDate, price, duration, parseISO } from '../lib/format.js';
 
-/** Демонстрационный QR-код: настоящая структура (поисковые узоры, синхрополосы), данные — из номера заказа. */
+/** Demo QR code: real structure (finder and timing patterns), data derived from the order number. */
 export function qrMatrix(text, size = 25) {
   const random = rng(`qr|${text}`);
   const m = Array.from({ length: size }, () => Array(size).fill(0));
@@ -28,7 +28,7 @@ export function qrMatrix(text, size = 25) {
     m[6][i] = m[i][6] = i % 2 === 0 ? 1 : 0;
     reserved[6][i] = reserved[i][6] = true;
   }
-  // Выравнивающий узор
+  // Alignment pattern
   const a = size - 9;
   for (let r = -2; r <= 2; r++) for (let c = -2; c <= 2; c++) {
     reserved[a + r][a + c] = true;
@@ -46,20 +46,20 @@ export function qrSVG(text, { px = 160, dark = '#090909', light = '#f2eeee' } = 
   const q = 2;
   let rects = '';
   m.forEach((row, r) => row.forEach((v, c) => { if (v) rects += `<rect x="${c + q}" y="${r + q}" width="1.02" height="1.02"/>`; }));
-  return `<svg class="qr" viewBox="0 0 ${n + q * 2} ${n + q * 2}" width="${px}" height="${px}" shape-rendering="crispEdges" role="img" aria-label="QR-код билета ${esc(text)}">
+  return `<svg class="qr" viewBox="0 0 ${n + q * 2} ${n + q * 2}" width="${px}" height="${px}" shape-rendering="crispEdges" role="img" aria-label="Ticket QR code ${esc(text)}">
     <rect width="100%" height="100%" fill="${light}"/><g fill="${dark}">${rects}</g></svg>`;
 }
 
 const STATUS = {
-  paid: { label: 'Оплачен', cls: 'is-paid' },
-  reserved: { label: 'Бронь — оплата в кассе', cls: 'is-reserved' },
-  cancelled: { label: 'Возвращён', cls: 'is-cancelled' },
+  paid: { label: 'Paid', cls: 'is-paid' },
+  reserved: { label: 'Booked — pay at box office', cls: 'is-reserved' },
+  cancelled: { label: 'Refunded', cls: 'is-cancelled' },
 };
 
 export function seatsText(order) {
   const rows = {};
   order.seats.forEach((s) => { (rows[s.row] ||= []).push(s.num); });
-  return Object.entries(rows).map(([r, nums]) => `ряд ${r}: ${nums.sort((a, b) => a - b).join(', ')}`).join('; ');
+  return Object.entries(rows).map(([r, nums]) => `row ${r}: seats ${nums.sort((a, b) => a - b).join(', ')}`).join('; ');
 }
 
 export function ticketView(order, { compact = false } = {}) {
@@ -67,7 +67,7 @@ export function ticketView(order, { compact = false } = {}) {
   const hall = getHallById(order.hallId);
   const st = STATUS[order.status] || STATUS.paid;
   return html`
-  <article class="ticket ${st.cls}${compact ? ' ticket--compact' : ''}" aria-label="Электронный билет ${order.id}">
+  <article class="ticket ${st.cls}${compact ? ' ticket--compact' : ''}" aria-label="E-ticket ${order.id}">
     <div class="ticket__main">
       <div class="ticket__brand">
         <span class="ticket__logo">${icon('logoMark')}<span>Cinema <em>Example</em></span></span>
@@ -76,31 +76,31 @@ export function ticketView(order, { compact = false } = {}) {
       <div class="ticket__film">
         <div class="ticket__poster">${poster(film, { title: false, label: false })}</div>
         <div>
-          <p class="ticket__label">Фильм</p>
+          <p class="ticket__label">Film</p>
           <h3 class="ticket__title">${esc(film.title)}</h3>
           <p class="ticket__sub">${film.age} · ${duration(film.duration)} · ${order.format}</p>
         </div>
       </div>
       <dl class="ticket__grid">
-        <div><dt>Дата</dt><dd>${formatDate(order.date)}</dd></div>
-        <div><dt>Начало</dt><dd class="tnum">${order.time}</dd></div>
-        <div><dt>Зал</dt><dd>${hall.number} · ${esc(hall.name)}</dd></div>
-        <div><dt>Места</dt><dd>${order.seats.map((s) => `<span class="ticket__seat">${s.row}<small>ряд</small> ${s.num}<small>место</small></span>`).join('')}</dd></div>
+        <div><dt>Date</dt><dd>${formatDate(order.date)}</dd></div>
+        <div><dt>Starts</dt><dd class="tnum">${order.time}</dd></div>
+        <div><dt>Room</dt><dd>${hall.number} · ${esc(hall.name)}</dd></div>
+        <div><dt>Seats</dt><dd>${order.seats.map((s) => `<span class="ticket__seat"><small>row</small>${s.row} <small>seat</small>${s.num}</span>`).join('')}</dd></div>
       </dl>
       <div class="ticket__foot">
-        <span><small>Гость</small>${esc(order.customer.firstName)} ${esc(order.customer.lastName)}</span>
-        <span><small>${order.status === 'reserved' ? 'К оплате' : 'Сумма'}</small><b class="tnum">${price(order.total)}</b></span>
+        <span><small>Guest</small>${esc(order.customer.firstName)} ${esc(order.customer.lastName)}</span>
+        <span><small>${order.status === 'reserved' ? 'Due' : 'Total'}</small><b class="tnum">${price(order.total)}</b></span>
       </div>
     </div>
     <div class="ticket__stub">
       <div class="ticket__qr">${qrSVG(order.id, { px: compact ? 110 : 150 })}</div>
-      <p class="ticket__order"><small>Заказ</small><b class="tnum">${order.id}</b></p>
-      <p class="ticket__hint">Покажите QR-код контролёру на входе в зал</p>
+      <p class="ticket__order"><small>Order</small><b class="tnum">${order.id}</b></p>
+      <p class="ticket__hint">Show this QR code at the entrance</p>
     </div>
   </article>`;
 }
 
-/** Самодостаточный SVG-файл билета для скачивания. */
+/** Self-contained SVG ticket file for download. */
 export function ticketFileSVG(order) {
   const film = getFilmById(order.filmId);
   const hall = getHallById(order.hallId);
@@ -128,16 +128,16 @@ export function ticketFileSVG(order) {
   <g font-family="Arial, Helvetica, sans-serif">
     <text x="650" y="70" text-anchor="end" font-size="14" fill="#b99a60" letter-spacing="2">${e(st.label.toUpperCase())}</text>
     <text x="50" y="192" font-size="15" fill="#a49b9b">${e(film.age)} · ${e(duration(film.duration))} · ${e(order.format)}</text>
-    <text x="50" y="250" font-size="12" fill="#b99a60" letter-spacing="2">ДАТА</text>
+    <text x="50" y="250" font-size="12" fill="#b99a60" letter-spacing="2">DATE</text>
     <text x="50" y="278" font-size="22" fill="#f2eeee">${e(formatDate(order.date))}</text>
-    <text x="250" y="250" font-size="12" fill="#b99a60" letter-spacing="2">НАЧАЛО</text>
+    <text x="250" y="250" font-size="12" fill="#b99a60" letter-spacing="2">STARTS</text>
     <text x="250" y="278" font-size="22" fill="#f2eeee">${e(order.time)}</text>
-    <text x="400" y="250" font-size="12" fill="#b99a60" letter-spacing="2">ЗАЛ</text>
+    <text x="400" y="250" font-size="12" fill="#b99a60" letter-spacing="2">ROOM</text>
     <text x="400" y="278" font-size="22" fill="#f2eeee">${hall.number} · ${e(hall.name)}</text>
-    <text x="50" y="324" font-size="12" fill="#b99a60" letter-spacing="2">РЯД-МЕСТО</text>
+    <text x="50" y="324" font-size="12" fill="#b99a60" letter-spacing="2">ROW-SEAT</text>
     <text x="50" y="352" font-size="20" fill="#f2eeee">${e(seats)}</text>
     <text x="650" y="352" text-anchor="end" font-size="22" fill="#f2eeee">${e(price(order.total))}</text>
-    <text x="850" y="318" text-anchor="middle" font-size="12" fill="#b99a60" letter-spacing="2">ЗАКАЗ</text>
+    <text x="850" y="318" text-anchor="middle" font-size="12" fill="#b99a60" letter-spacing="2">ORDER</text>
     <text x="850" y="346" text-anchor="middle" font-size="22" fill="#f2eeee" font-family="Courier New, monospace">${e(order.id)}</text>
     <text x="850" y="372" text-anchor="middle" font-size="10" fill="#a49b9b">${e(CINEMA.addressFull)}</text>
   </g>
@@ -174,10 +174,10 @@ export function icsFor(order) {
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cinema Example//Tickets//RU', 'BEGIN:VEVENT',
     `UID:${order.id}@cinema-example.demo`,
     `DTSTART:${f(start)}`, `DTEND:${f(end)}`,
-    `SUMMARY:Кино: ${film.title}`,
-    `LOCATION:${CINEMA.addressFull}, зал ${hall.number}`,
-    `DESCRIPTION:Заказ ${order.id}. Места: ${seatsText(order)}.`,
-    'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', 'DESCRIPTION:Скоро сеанс в Cinema Example', 'END:VALARM',
+    `SUMMARY:Movie: ${film.title}`,
+    `LOCATION:${CINEMA.addressFull}, room ${hall.number}`,
+    `DESCRIPTION:Order ${order.id}. Seats: ${seatsText(order)}.`,
+    'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', 'DESCRIPTION:Your show at Cinema Example starts soon', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
 }

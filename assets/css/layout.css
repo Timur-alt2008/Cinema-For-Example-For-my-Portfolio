@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Шапка, меню, подвал, переходы между страницами
+   Header, menu, footer, page transitions
    ========================================================================== */
 
-/* Полоса загрузки маршрута — «луч проектора» */
+/* Route progress bar — the “projector beam” */
 .route-progress {
   position: fixed;
   top: 0; left: 0;
@@ -17,7 +17,7 @@
 .route-progress.is-active { opacity: 1; width: 70%; transition: width 1.6s var(--ease-out), opacity 120ms; }
 .route-progress.is-done { opacity: 0; width: 100%; transition: width 200ms, opacity 400ms 200ms; }
 
-/* ------------------------------ Шапка ------------------------------------ */
+/* ------------------------------ Header ------------------------------------ */
 .site-header {
   position: fixed;
   inset: 0 0 auto 0;
@@ -148,7 +148,7 @@
 .header__cta { margin-left: 6px; }
 .burger { display: none; }
 
-/* Выпадающая панель уведомлений */
+/* Notifications dropdown */
 .dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -186,7 +186,7 @@
 .dropdown__empty { padding: 18px 14px 20px; color: var(--c-muted); font-size: 0.86rem; }
 .notif-wrap { position: relative; }
 
-/* Мобильное меню */
+/* Mobile menu */
 .mobile-menu {
   position: fixed;
   inset: 0;
@@ -229,7 +229,7 @@
 .mobile-menu__foot { margin-top: auto; padding-top: 28px; display: grid; gap: 12px; }
 .mobile-menu__foot .btn { width: 100%; }
 
-/* ------------------------------ Страница --------------------------------- */
+/* ------------------------------ Page --------------------------------- */
 .page {
   flex: 1;
   outline: none;
@@ -246,7 +246,7 @@
   to { opacity: 0; transform: translateY(-6px); }
 }
 
-/* Шапка внутренних страниц */
+/* Inner page hero */
 .page-hero {
   position: relative;
   padding-block: clamp(48px, 8vw, 96px) clamp(32px, 5vw, 56px);
@@ -275,7 +275,7 @@
 .crumbs a:hover { color: var(--c-gold); }
 .crumbs span[aria-hidden] { color: var(--c-dim); }
 
-/* ------------------------------ Подвал ----------------------------------- */
+/* ------------------------------ Footer ----------------------------------- */
 .site-footer {
   position: relative;
   margin-top: 40px;
@@ -355,7 +355,7 @@
   box-shadow: 0 0 8px var(--c-gold);
 }
 
-/* ------------------------------ Адаптив ---------------------------------- */
+/* ------------------------------ Responsive ---------------------------------- */
 @media (max-width: 1180px) {
   .nav__link { padding-inline: 9px; }
   .header__user span { display: none; }

@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Компоненты: кнопки, формы, карточки, модальные окна, уведомления
+   Components: buttons, forms, cards, modals, toasts
    ========================================================================== */
 
-/* ------------------------------ Кнопки ----------------------------------- */
+/* ------------------------------ Buttons ----------------------------------- */
 .btn {
   --btn-bg: transparent;
   --btn-fg: var(--c-text);
@@ -84,7 +84,7 @@
 .link-arrow svg { width: 16px; height: 16px; transition: transform var(--t-mid) var(--ease); }
 .link-arrow:hover svg { transform: translateX(4px); }
 
-/* ------------------------------ Чипы / бейджи ---------------------------- */
+/* ------------------------------ Chips / badges ---------------------------- */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   display: inline-flex;
@@ -146,7 +146,7 @@
 .meta svg { width: 15px; height: 15px; color: var(--c-gold); }
 .meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--c-dim); }
 
-/* ------------------------------ Формы ------------------------------------ */
+/* ------------------------------ Forms ------------------------------------ */
 .field { display: grid; gap: 8px; }
 .field__label {
   font-size: 0.74rem;
@@ -273,7 +273,7 @@
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .form-grid .span-2 { grid-column: 1 / -1; }
 
-/* ------------------------------ Панели ----------------------------------- */
+/* ------------------------------ Panels ----------------------------------- */
 .panel {
   position: relative;
   background: linear-gradient(180deg, rgba(28, 25, 25, 0.75), rgba(17, 15, 15, 0.75));
@@ -290,7 +290,7 @@
   margin-bottom: 18px;
 }
 
-/* ------------------------------ Карточка фильма -------------------------- */
+/* ------------------------------ Film card -------------------------- */
 .film-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -399,11 +399,11 @@
   .film-card .film-card__media:hover ~ .fav-btn { opacity: 1; }
 }
 
-/* Постер */
+/* Poster */
 .poster { width: 100%; height: 100%; display: block; }
 .poster text { font-kerning: normal; }
 
-/* Горизонтальная лента */
+/* Horizontal rail */
 .rail {
   display: grid;
   grid-auto-flow: column;
@@ -431,7 +431,7 @@
 .rail-nav button:hover { background: var(--c-gold); color: var(--c-black); }
 .rail-nav svg { width: 18px; height: 18px; }
 
-/* ------------------------------ Табы и сегменты -------------------------- */
+/* ------------------------------ Tabs and segments -------------------------- */
 .tabs {
   display: flex;
   gap: 4px;
@@ -456,7 +456,7 @@
 .tab:hover { color: var(--c-text); }
 .tab.is-active { background: var(--c-text); color: var(--c-black); }
 
-/* Дни недели (лента дат) */
+/* Date strip */
 .days {
   display: flex;
   gap: 10px;
@@ -491,7 +491,7 @@
 }
 .day.is-active .day__wd { color: var(--c-gold); }
 
-/* ------------------------------ Аккордеон -------------------------------- */
+/* ------------------------------ Accordion -------------------------------- */
 .accordion { display: grid; gap: 10px; }
 .acc {
   border: 1px solid var(--line-neutral);
@@ -538,7 +538,7 @@
 .acc__panel > div { overflow: hidden; }
 .acc__panel p { padding: 0 22px 22px; color: var(--c-muted); max-width: 72ch; }
 
-/* ------------------------------ Модальные окна --------------------------- */
+/* ------------------------------ Modals --------------------------- */
 .modal {
   position: fixed;
   inset: 0;
@@ -593,7 +593,7 @@
 @keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.96); } }
 @keyframes modalOut { to { opacity: 0; transform: translateY(12px) scale(0.98); } }
 
-/* ------------------------------ Тосты ------------------------------------ */
+/* ------------------------------ Toasts ------------------------------------ */
 .toasts {
   position: fixed;
   right: 20px;
@@ -640,7 +640,7 @@
 @keyframes toastIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } }
 @keyframes toastOut { to { opacity: 0; transform: translateX(30px); } }
 
-/* ------------------------------ Скелетоны / пустые состояния ------------- */
+/* ------------------------------ Skeletons / empty states ------------- */
 .skeleton {
   position: relative;
   overflow: hidden;
@@ -692,7 +692,7 @@
   text-align: center;
 }
 
-/* ------------------------------ Шаги покупки ---------------------------- */
+/* ------------------------------ Checkout steps ---------------------------- */
 .steps {
   display: flex;
   align-items: center;
@@ -719,7 +719,7 @@
 .step.is-current .step__n { background: var(--c-blood); border-color: var(--c-blood); color: #fff; }
 .steps__line { width: 28px; height: 1px; background: var(--line); flex-shrink: 0; }
 
-/* ------------------------------ Звёздный рейтинг ------------------------- */
+/* ------------------------------ Star rating ------------------------- */
 .stars { display: inline-flex; gap: 2px; color: var(--c-gold); }
 .stars svg { width: 14px; height: 14px; }
 .stars .off { color: rgba(185, 154, 96, 0.25); }
@@ -732,7 +732,7 @@
 .star-input input:checked ~ label { color: var(--c-gold); }
 .star-input input:focus-visible + label { outline: 2px solid var(--c-gold); border-radius: 4px; }
 
-/* ------------------------------ Плитки ----------------------------------- */
+/* ------------------------------ Tiles ----------------------------------- */
 .tile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .feature {
   position: relative;

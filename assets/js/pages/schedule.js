@@ -11,11 +11,11 @@ import { dayParts, duration, formatDate, price, plural } from '../lib/format.js'
 
 const FORMATS = ['all', '2D', '3D', 'IMAX', 'VIP'];
 const PARTS = [
-  { key: 'all', label: 'Весь день' },
-  { key: 'morning', label: 'Утро', from: 0, to: 12 * 60 },
-  { key: 'day', label: 'День', from: 12 * 60, to: 18 * 60 },
-  { key: 'evening', label: 'Вечер', from: 18 * 60, to: 22 * 60 + 30 },
-  { key: 'night', label: 'Ночь', from: 22 * 60 + 30, to: 24 * 60 },
+  { key: 'all', label: 'All day' },
+  { key: 'morning', label: 'Morning', from: 0, to: 12 * 60 },
+  { key: 'day', label: 'Afternoon', from: 12 * 60, to: 18 * 60 },
+  { key: 'evening', label: 'Evening', from: 18 * 60, to: 22 * 60 + 30 },
+  { key: 'night', label: 'Late night', from: 22 * 60 + 30, to: 24 * 60 },
 ];
 
 function filter(sessions, st) {
@@ -51,11 +51,11 @@ function listView(sessions) {
             const inner = html`
               <span class="sched-time__t tnum">${s.time}</span>
               <span class="sched-time__fmt badge badge--fmt" data-fmt="${s.format}">${s.format}</span>
-              <span class="sched-time__hall">Зал ${s.hall.number} · ${esc(s.hall.name)}</span>
-              <span class="sched-time__price">${closed ? 'продажа закрыта' : `от ${price(s.price)}`}</span>`;
+              <span class="sched-time__hall">Room ${s.hall.number} · ${esc(s.hall.name)}</span>
+              <span class="sched-time__price">${closed ? 'sales closed' : `from ${price(s.price)}`}</span>`;
             return closed
               ? `<span class="sched-time is-closed" aria-disabled="true">${inner}</span>`
-              : `<a class="sched-time${s.sales === 'closing' ? ' is-closing' : ''}${s.midnight ? ' is-midnight' : ''}" href="#/session/${s.id}" aria-label="${esc(g.film.title)}, ${s.time}, ${s.format}, зал ${s.hall.number}, от ${price(s.price)}">${inner}${s.sales === 'closing' ? '<span class="sched-time__flag">скоро начало</span>' : ''}</a>`;
+              : `<a class="sched-time${s.sales === 'closing' ? ' is-closing' : ''}${s.midnight ? ' is-midnight' : ''}" href="#/session/${s.id}" aria-label="${esc(g.film.title)}, ${s.time}, ${s.format}, room ${s.hall.number}, from ${price(s.price)}">${inner}${s.sales === 'closing' ? '<span class="sched-time__flag">starting soon</span>' : ''}</a>`;
           })}
         </div>
       </div>
@@ -64,7 +64,7 @@ function listView(sessions) {
 }
 
 export default async function schedule({ query, isCurrent }) {
-  setTitle('Расписание сеансов');
+  setTitle('Showtimes');
   const dates = scheduleDates();
   const st = {
     date: dates.includes(query.date) ? query.date : dates[0],
@@ -76,30 +76,30 @@ export default async function schedule({ query, isCurrent }) {
 
   const root = mount(html`
     ${pageHero({
-      trail: [{ label: 'Расписание' }],
-      eyebrow: 'Сеансы на неделю',
-      title: 'Расписание',
-      lead: 'Выберите день, формат и время — затем место в зале. Детские сеансы идут днём, хорроры 18+ — после обеда и до глубокой ночи.',
+      trail: [{ label: 'Showtimes' }],
+      eyebrow: 'The week ahead',
+      title: 'Showtimes',
+      lead: 'Choose a day, format and time — then your seat. Kids’ films play in the daytime, 18+ horror from the afternoon until late at night.',
     })}
     <section class="wrap schedule">
-      <div class="days" role="tablist" aria-label="Выбор даты" data-days>
+      <div class="days" role="tablist" aria-label="Choose a date" data-days>
         ${dates.map((d) => {
           const p = dayParts(d);
           return `<button class="day${d === st.date ? ' is-active' : ''}${p.weekend ? ' is-weekend' : ''}" type="button" role="tab" aria-selected="${d === st.date}" data-date="${d}"><span class="day__wd">${p.wd}</span><span class="day__num">${p.num}</span><span class="day__mon">${p.mon}</span></button>`;
         })}
       </div>
       <div class="schedule__filters">
-        <div class="chips" role="group" aria-label="Формат">
-          ${FORMATS.map((f) => `<button class="chip" type="button" data-format="${f}" aria-pressed="${f === st.format}">${f === 'all' ? 'Все форматы' : f}</button>`)}
+        <div class="chips" role="group" aria-label="Format">
+          ${FORMATS.map((f) => `<button class="chip" type="button" data-format="${f}" aria-pressed="${f === st.format}">${f === 'all' ? 'All formats' : f}</button>`)}
         </div>
         <div class="schedule__selects">
-          <label class="visually-hidden" for="sched-part">Время суток</label>
+          <label class="visually-hidden" for="sched-part">Time of day</label>
           <select class="select" id="sched-part" data-part>${PARTS.map((p) => `<option value="${p.key}" ${p.key === st.part ? 'selected' : ''}>${p.label}</option>`)}</select>
-          <label class="visually-hidden" for="sched-hall">Зал</label>
-          <select class="select" id="sched-hall" data-hall><option value="all">Все залы</option>${HALLS.map((h) => `<option value="${h.id}" ${h.id === st.hall ? 'selected' : ''}>Зал ${h.number} · ${h.name}</option>`)}</select>
+          <label class="visually-hidden" for="sched-hall">Room</label>
+          <select class="select" id="sched-hall" data-hall><option value="all">All rooms</option>${HALLS.map((h) => `<option value="${h.id}" ${h.id === st.hall ? 'selected' : ''}>Room ${h.number} · ${h.name}</option>`)}</select>
         </div>
       </div>
-      <label class="check schedule__open"><input type="checkbox" data-open ${st.open ? 'checked' : ''}> Скрыть сеансы, на которые продажа закрыта</label>
+      <label class="check schedule__open"><input type="checkbox" data-open ${st.open ? 'checked' : ''}> Hide shows that are closed for sale</label>
       <div class="schedule__summary" data-summary aria-live="polite"></div>
       <div data-list></div>
     </section>
@@ -126,19 +126,19 @@ export default async function schedule({ query, isCurrent }) {
       const items = filter(all, st);
       const films = new Set(items.map((s) => s.filmId)).size;
       summary.innerHTML = items.length
-        ? `<b>${formatDate(st.date, { weekday: true })}</b> · ${items.length} ${plural(items.length, ['сеанс', 'сеанса', 'сеансов'])}, ${films} ${plural(films, ['фильм', 'фильма', 'фильмов'])}`
+        ? `<b>${formatDate(st.date, { weekday: true })}</b> · ${items.length} ${plural(items.length, ['show', 'shows'])}, ${films} ${plural(films, ['film', 'films'])}`
         : '';
       if (!items.length) {
         const closedAll = all.length && all.every((s) => s.sales === 'closed');
         list.innerHTML = emptyState({
           iconName: 'calendar',
-          title: closedAll ? 'На сегодня сеансы закончились' : 'Нет подходящих сеансов',
+          title: closedAll ? 'That’s all for today' : 'No matching shows',
           text: closedAll
-            ? 'Последний сеанс уже начался. Посмотрите расписание на завтра — билеты уже в продаже.'
-            : 'Попробуйте выбрать другой формат, время суток или зал.',
+            ? 'The last show has already started. Check tomorrow’s schedule — tickets are on sale.'
+            : 'Try a different format, time of day or room.',
           action: closedAll
-            ? `<button class="btn btn--primary" type="button" data-date-jump="${dates[1]}">Расписание на завтра</button>`
-            : '<button class="btn btn--ghost" type="button" data-reset>Сбросить фильтры</button>',
+            ? `<button class="btn btn--primary" type="button" data-date-jump="${dates[1]}">Tomorrow’s schedule</button>`
+            : '<button class="btn btn--ghost" type="button" data-reset>Reset filters</button>',
         });
         return;
       }

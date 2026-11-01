@@ -19,7 +19,7 @@ export function getBooking() {
 }
 
 function seatLabel(seat) {
-  return `Ряд ${seat.row}, место ${seat.num}${seat.type === 'vip' ? ', VIP' : ''}, ${price(seat.price)}${seat.occupied ? ', занято' : ''}`;
+  return `Row ${seat.row}, seat ${seat.num}${seat.type === 'vip' ? ', VIP' : ''}, ${price(seat.price)}${seat.occupied ? ', taken' : ''}`;
 }
 
 function mapView(s) {
@@ -30,9 +30,9 @@ function mapView(s) {
         <svg viewBox="0 0 600 60" preserveAspectRatio="none"><defs><linearGradient id="scr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f2eeee" stop-opacity=".55"/><stop offset="1" stop-color="#f2eeee" stop-opacity="0"/></linearGradient></defs>
           <path d="M20 40 Q300 0 580 40" fill="none" stroke="#f2eeee" stroke-width="3" stroke-linecap="round"/>
           <path d="M20 40 Q300 0 580 40 L560 60 Q300 26 40 60 Z" fill="url(#scr)" opacity=".5"/></svg>
-        <span>Экран</span>
+        <span>Screen</span>
       </div>
-      <div class="hall-map__rows" role="grid" aria-label="Схема зала ${esc(s.hall.name)}">
+      <div class="hall-map__rows" role="grid" aria-label="Seating plan for ${esc(s.hall.name)}">
         ${s.map.map((row) => html`<div class="seat-row" role="row" style="--offset:${row.offset}">
           <span class="seat-row__n" aria-hidden="true">${row.number}</span>
           <div class="seat-row__seats">
@@ -49,18 +49,18 @@ function mapView(s) {
 }
 
 export default async function seatsPage({ params, scope, isCurrent }) {
-  mount(loadingView('Готовим схему зала…'));
+  mount(loadingView('Preparing the seating plan…'));
   let s;
   try {
     s = await getSessionDetails(params.id);
   } catch (err) {
     if (!isCurrent()) return;
     mount(errorState(err));
-    setTitle('Сеанс не найден');
+    setTitle('Show not found');
     return;
   }
   if (!isCurrent()) return;
-  setTitle(`Выбор мест — ${s.film.title}`);
+  setTitle(`Choose seats — ${s.film.title}`);
 
   const allSeats = s.map.flatMap((r) => r.seats);
   const byId = new Map(allSeats.map((x) => [x.id, x]));
@@ -68,7 +68,7 @@ export default async function seatsPage({ params, scope, isCurrent }) {
   const vip = allSeats.find((x) => x.type === 'vip');
   const free = allSeats.filter((x) => !x.occupied).length;
 
-  // Восстанавливаем выбор, если пользователь вернулся к этому сеансу
+  // Restore the selection if the user comes back to this show
   const saved = getBooking();
   let selected = saved && saved.sessionId === s.id ? saved.seats.filter((id) => byId.get(id) && !byId.get(id).occupied) : [];
   let expiresAt = saved && saved.sessionId === s.id ? saved.expiresAt : null;
@@ -78,7 +78,7 @@ export default async function seatsPage({ params, scope, isCurrent }) {
   const root = mount(html`
     <section class="booking wrap">
       <div class="booking__top">
-        <a class="link-arrow link-arrow--back" href="#/film/${s.film.id}?buy=1">${icon('arrowLeft')} К фильму</a>
+        <a class="link-arrow link-arrow--back" href="#/film/${s.film.id}?buy=1">${icon('arrowLeft')} Back to film</a>
         ${stepsBar(1)}
       </div>
       <header class="booking__head">
@@ -89,41 +89,41 @@ export default async function seatsPage({ params, scope, isCurrent }) {
             <span class="badge badge--age" data-age="${s.film.age}">${s.film.age}</span>
             <span>${icon('calendar')}${formatDate(s.date, { weekday: true })}</span>
             <span>${icon('clock')}<b class="tnum">${s.time}</b></span>
-            <span>${icon('door')}Зал ${s.hall.number} · «${esc(s.hall.name)}»</span>
+            <span>${icon('door')}Room ${s.hall.number} · ${esc(s.hall.name)}</span>
             <span class="badge badge--fmt" data-fmt="${s.format}">${s.format}</span>
             <span class="muted">${duration(s.film.duration)}</span>
           </div>
         </div>
-        <a class="btn btn--ghost btn--sm booking__change" href="#/schedule?date=${s.date}">${icon('calendar')} Другой сеанс</a>
+        <a class="btn btn--ghost btn--sm booking__change" href="#/schedule?date=${s.date}">${icon('calendar')} Another showtime</a>
       </header>
 
-      ${closed ? `<div class="notice notice--error">${icon('alert')} Продажа билетов на этот сеанс закрыта — он начинается меньше чем через 10 минут или уже идёт.</div>` : ''}
-      ${s.sales === 'closing' ? `<div class="notice">${icon('clock')} До начала сеанса меньше 45 минут — оформите заказ быстрее, места разбирают.</div>` : ''}
+      ${closed ? `<div class="notice notice--error">${icon('alert')} Ticket sales for this show are closed — it starts in under 10 minutes or is already playing.</div>` : ''}
+      ${s.sales === 'closing' ? `<div class="notice">${icon('clock')} Less than 45 minutes to showtime — book quickly, seats are going fast.</div>` : ''}
 
       <div class="booking__grid">
         <div class="seat-panel panel">
           <div class="seat-panel__top">
-            <ul class="legend" aria-label="Обозначения">
-              <li><span class="seat seat--std seat--demo"></span>Свободно${std ? ` · <b>${price(std.price)}</b>` : ''}</li>
-              ${vip ? `<li><span class="seat seat--vip seat--demo"></span>${s.hall.id === 'h3' ? 'Реклайнер' : s.hall.id === 'h2' ? 'Точка обзора' : 'VIP-диван'} · <b>${price(vip.price)}</b></li>` : ''}
-              <li><span class="seat seat--std seat--demo is-selected"></span>Ваш выбор</li>
-              <li><span class="seat seat--std seat--demo is-occupied"></span>Занято</li>
+            <ul class="legend" aria-label="Legend">
+              <li><span class="seat seat--std seat--demo"></span>Available${std ? ` · <b>${price(std.price)}</b>` : ''}</li>
+              ${vip ? `<li><span class="seat seat--vip seat--demo"></span>${s.hall.id === 'h3' ? 'Recliner' : s.hall.id === 'h2' ? 'Sweet Spot' : 'VIP love seat'} · <b>${price(vip.price)}</b></li>` : ''}
+              <li><span class="seat seat--std seat--demo is-selected"></span>Your pick</li>
+              <li><span class="seat seat--std seat--demo is-occupied"></span>Taken</li>
             </ul>
-            <div class="zoom" role="group" aria-label="Масштаб схемы">
-              <button type="button" data-zoom="-1" aria-label="Уменьшить">${icon('zoomOut')}</button>
-              <button type="button" data-zoom="0" aria-label="Обычный масштаб">${icon('reset')}</button>
-              <button type="button" data-zoom="1" aria-label="Увеличить">${icon('zoomIn')}</button>
+            <div class="zoom" role="group" aria-label="Plan zoom">
+              <button type="button" data-zoom="-1" aria-label="Zoom out">${icon('zoomOut')}</button>
+              <button type="button" data-zoom="0" aria-label="Reset zoom">${icon('reset')}</button>
+              <button type="button" data-zoom="1" aria-label="Zoom in">${icon('zoomIn')}</button>
             </div>
           </div>
-          <div class="seat-scroll" data-scroll tabindex="0" aria-label="Схема зала, можно прокручивать">
+          <div class="seat-scroll" data-scroll tabindex="0" aria-label="Seating plan, scrollable">
             ${mapView(s)}
           </div>
-          <p class="seat-panel__hint muted">${icon('info')} Свободно ${seatsWord(free)} из ${allSeats.length}. Нажмите на кресло, чтобы выбрать, и ещё раз — чтобы отменить. До ${MAX_SEATS} мест в заказе.</p>
+          <p class="seat-panel__hint muted">${icon('info')} ${seatsWord(free)} of ${allSeats.length} available. Tap a seat to select it, tap again to remove it. Up to ${MAX_SEATS} seats per order.</p>
         </div>
 
-        <aside class="summary panel panel--gold" data-summary aria-label="Ваш заказ">
+        <aside class="summary panel panel--gold" data-summary aria-label="Your order">
           <div class="summary__head">
-            <h2 class="panel__title">Ваш заказ</h2>
+            <h2 class="panel__title">Your order</h2>
             <span class="summary__timer" data-timer hidden>${icon('clock')}<span class="tnum"></span></span>
           </div>
           <div data-summary-body></div>
@@ -132,10 +132,10 @@ export default async function seatsPage({ params, scope, isCurrent }) {
     </section>
     <div class="mobile-bar" data-mobile-bar>
       <button class="mobile-bar__info" type="button" data-scroll-summary>
-        <span data-mb-count>Места не выбраны</span>
+        <span data-mb-count>No seats selected</span>
         <b class="tnum" data-mb-total>0 ₴</b>
       </button>
-      <button class="btn btn--primary" type="button" data-continue>Продолжить ${icon('arrowRight')}</button>
+      <button class="btn btn--primary" type="button" data-continue>Continue ${icon('arrowRight')}</button>
     </div>
   `);
 
@@ -173,20 +173,20 @@ export default async function seatsPage({ params, scope, isCurrent }) {
         <ul class="summary__list">
           ${seats.map((x) => html`<li class="summary__seat">
             <span class="summary__seat-ico seat seat--${x.type} is-selected"></span>
-            <span><b>${x.row} ряд, ${x.num} место</b><small>${x.type === 'vip' ? (s.hall.id === 'h3' ? 'Реклайнер VIP' : 'VIP') : 'Стандарт'}</small></span>
+            <span><b>Row ${x.row}, seat ${x.num}</b><small>${x.type === 'vip' ? (s.hall.id === 'h3' ? 'VIP recliner' : 'VIP') : 'Standard'}</small></span>
             <span class="tnum">${price(x.price)}</span>
-            <button class="summary__remove" type="button" data-remove="${x.id}" aria-label="Убрать место: ряд ${x.row}, место ${x.num}">${icon('close')}</button>
+            <button class="summary__remove" type="button" data-remove="${x.id}" aria-label="Remove seat: row ${x.row}, seat ${x.num}">${icon('close')}</button>
           </li>`)}
         </ul>
-        <div class="summary__total"><span>${seats.length} ${plural(seats.length, ['билет', 'билета', 'билетов'])}</span><b class="tnum">${price(sum)}</b></div>
-        <button class="btn btn--primary btn--lg btn--block" type="button" data-continue>${icon('ticket')} Перейти к оформлению</button>
-        <button class="btn btn--quiet btn--block" type="button" data-clear>${icon('trash')} Сбросить выбор</button>`
+        <div class="summary__total"><span>${seats.length} ${plural(seats.length, ['ticket', 'tickets'])}</span><b class="tnum">${price(sum)}</b></div>
+        <button class="btn btn--primary btn--lg btn--block" type="button" data-continue>${icon('ticket')} Continue to checkout</button>
+        <button class="btn btn--quiet btn--block" type="button" data-clear>${icon('trash')} Clear selection</button>`
       : html`<div class="summary__empty">
           <span class="summary__empty-ico">${icon('seat')}</span>
-          <p>Выберите места на схеме зала. Лучший звук — в центре, ближе к последней трети зала.</p>
+          <p>Pick your seats on the plan. The best sound is in the centre, about two-thirds of the way back.</p>
         </div>
-        <button class="btn btn--primary btn--lg btn--block" type="button" disabled>${icon('ticket')} Перейти к оформлению</button>`;
-    $('[data-mb-count]', root).textContent = seats.length ? `${seats.length} ${plural(seats.length, ['место', 'места', 'мест'])}: ${seats.map((x) => `${x.row}-${x.num}`).join(', ')}` : 'Места не выбраны';
+        <button class="btn btn--primary btn--lg btn--block" type="button" disabled>${icon('ticket')} Continue to checkout</button>`;
+    $('[data-mb-count]', root).textContent = seats.length ? `${seats.length} ${plural(seats.length, ['seat', 'seats'])}: ${seats.map((x) => `${x.row}-${x.num}`).join(', ')}` : 'No seats selected';
     $('[data-mb-total]', root).textContent = price(sum);
     mobileBar.classList.toggle('has-seats', seats.length > 0);
     tick();
@@ -199,7 +199,7 @@ export default async function seatsPage({ params, scope, isCurrent }) {
       selected = [];
       persist();
       renderSummary();
-      toast('Время брони истекло', { type: 'error', text: `Места удерживаются ${HOLD_MINUTES} минут. Выберите их заново.` });
+      toast('Your hold has expired', { type: 'error', text: `Seats are held for ${HOLD_MINUTES} minutes. Please select them again.` });
       return;
     }
     timerEl.hidden = false;
@@ -211,13 +211,13 @@ export default async function seatsPage({ params, scope, isCurrent }) {
   scope.interval(tick, 1000);
 
   function toggleSeat(btn) {
-    if (closed) { toast('Продажа закрыта', { type: 'error', text: 'Выберите другой сеанс в расписании.' }); return; }
+    if (closed) { toast('Sales closed', { type: 'error', text: 'Please choose another showtime.' }); return; }
     const id = btn.dataset.seat;
     if (selected.includes(id)) {
       selected = selected.filter((x) => x !== id);
     } else {
       if (selected.length >= MAX_SEATS) {
-        toast(`Не больше ${MAX_SEATS} мест`, { text: 'Для групповой брони напишите нам — подготовим отдельный зал.' });
+        toast(`No more than ${MAX_SEATS} seats`, { text: 'For group bookings, get in touch — we can set aside a whole room.' });
         return;
       }
       selected = [...selected, id];
@@ -231,7 +231,7 @@ export default async function seatsPage({ params, scope, isCurrent }) {
 
   function goCheckout() {
     if (!selected.length) {
-      toast('Сначала выберите места', { text: 'Нажмите на свободное кресло на схеме зала.' });
+      toast('Choose your seats first', { text: 'Tap any available seat on the plan.' });
       $('[data-scroll]', root).scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -245,8 +245,8 @@ export default async function seatsPage({ params, scope, isCurrent }) {
     const rm = e.target.closest('[data-remove]');
     if (rm) { selected = selected.filter((x) => x !== rm.dataset.remove); persist(); renderSummary(); return; }
     if (e.target.closest('[data-clear]')) {
-      const ok = await confirmDialog({ title: 'Сбросить выбор?', text: `Будут отменены ${seatsWord(selected.length)}.`, confirm: 'Сбросить', danger: true });
-      if (ok) { selected = []; persist(); renderSummary(); toast('Выбор мест сброшен'); }
+      const ok = await confirmDialog({ title: 'Clear your selection?', text: `${seatsWord(selected.length)} will be released.`, confirm: 'Clear', danger: true });
+      if (ok) { selected = []; persist(); renderSummary(); toast('Selection cleared'); }
       return;
     }
     if (e.target.closest('[data-continue]')) { goCheckout(); return; }
@@ -260,7 +260,7 @@ export default async function seatsPage({ params, scope, isCurrent }) {
     }
   });
 
-  // Центрируем схему на мобильных
+  // Centre the plan on mobile
   const scroller = $('[data-scroll]', root);
   requestAnimationFrame(() => { scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2; });
 

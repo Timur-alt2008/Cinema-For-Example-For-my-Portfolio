@@ -1,18 +1,18 @@
-// Форматирование дат, цен и длительности на русском языке.
+// Date, price and duration formatting (English).
 
-const WEEKDAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
-const WEEKDAYS_SHORT = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const pad = (n) => String(n).padStart(2, '0');
 
-/** Дата → 'YYYY-MM-DD' в локальном времени. */
+/** Date → 'YYYY-MM-DD' in local time. */
 export function isoDate(d = new Date()) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** 'YYYY-MM-DD' → Date (полночь, локальное время). */
+/** 'YYYY-MM-DD' → Date (local midnight). */
 export function parseISO(iso) {
   const [y, m, d] = String(iso).split('-').map(Number);
   if (!y || !m || !d) return null;
@@ -35,27 +35,27 @@ export function dayDiff(iso, base = new Date()) {
   return Math.round((a - b) / 86400000);
 }
 
+/** 'November 13', 'Friday, November 13', 'November 13, 2026' */
 export function formatDate(iso, { weekday = false, year = false } = {}) {
   const d = typeof iso === 'string' ? parseISO(iso) : iso;
   if (!d) return '';
-  let s = `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`;
-  if (year) s += ` ${d.getFullYear()}`;
-  if (weekday) s += `, ${WEEKDAYS[d.getDay()]}`;
+  let s = `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  if (year) s += `, ${d.getFullYear()}`;
+  if (weekday) s = `${WEEKDAYS[d.getDay()]}, ${s}`;
   return s;
 }
 
 export function formatDateShort(iso) {
   const d = typeof iso === 'string' ? parseISO(iso) : iso;
   if (!d) return '';
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`;
 }
 
 export function dayLabel(iso) {
   const diff = dayDiff(iso);
-  if (diff === 0) return 'Сегодня';
-  if (diff === 1) return 'Завтра';
-  const d = parseISO(iso);
-  return WEEKDAYS_SHORT[d.getDay()];
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  return WEEKDAYS_SHORT[parseISO(iso).getDay()];
 }
 
 export function dayParts(iso) {
@@ -70,21 +70,21 @@ export function dayParts(iso) {
 
 export function relativeDays(iso) {
   const diff = dayDiff(iso);
-  if (diff === 0) return 'сегодня';
-  if (diff === 1) return 'завтра';
-  if (diff > 1) return `через ${diff} ${plural(diff, ['день', 'дня', 'дней'])}`;
+  if (diff === 0) return 'today';
+  if (diff === 1) return 'tomorrow';
+  if (diff > 1) return `in ${diff} days`;
   return formatDate(iso);
 }
 
-/** 112 → '1 ч 52 мин' */
+/** 112 → '1h 52m' */
 export function duration(min) {
   const h = Math.floor(min / 60);
   const m = min % 60;
-  if (!h) return `${m} мин`;
-  return m ? `${h} ч ${m} мин` : `${h} ч`;
+  if (!h) return `${m}m`;
+  return m ? `${h}h ${m}m` : `${h}h`;
 }
 
-/** 'HHMM' или минуты → 'HH:MM' */
+/** 'HHMM' or minutes → 'HH:MM' */
 export function time(value) {
   if (typeof value === 'number') return `${pad(Math.floor(value / 60) % 24)}:${pad(value % 60)}`;
   const s = String(value).padStart(4, '0');
@@ -93,23 +93,19 @@ export function time(value) {
 
 export function price(value) {
   const n = Math.round(Number(value) || 0);
-  return `${n.toLocaleString('ru-RU').replace(/ /g, ' ')} ₴`;
+  return `₴${n.toLocaleString('en-US')}`;
 }
 
+/** plural(2, ['seat', 'seats']) → 'seats' */
 export function plural(n, forms) {
-  const a = Math.abs(n) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return forms[2];
-  if (b > 1 && b < 5) return forms[1];
-  if (b === 1) return forms[0];
-  return forms[2];
+  return Math.abs(n) === 1 ? forms[0] : forms[forms.length - 1];
 }
 
-export function seatsWord(n) { return `${n} ${plural(n, ['место', 'места', 'мест'])}`; }
-export function ticketsWord(n) { return `${n} ${plural(n, ['билет', 'билета', 'билетов'])}`; }
+export function seatsWord(n) { return `${n} ${plural(n, ['seat', 'seats'])}`; }
+export function ticketsWord(n) { return `${n} ${plural(n, ['ticket', 'tickets'])}`; }
 
 export function initials(name = '') {
-  return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toUpperCase() || 'Г';
+  return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toUpperCase() || 'G';
 }
 
 export function formatPhone(raw) {

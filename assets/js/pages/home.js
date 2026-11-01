@@ -13,11 +13,11 @@ import { subscribeNews } from '../services/api.js';
 import { duration, formatDate, price, relativeDays, todayISO } from '../lib/format.js';
 
 function heroContent(film, i) {
-  const label = i === 0 ? 'Фильм недели' : film.status === 'soon' ? 'Скоро в кино' : 'Сейчас в прокате';
+  const label = i === 0 ? 'Film of the week' : film.status === 'soon' ? 'Coming soon' : 'Now showing';
   return html`
     <p class="eyebrow hero__eyebrow">${label}</p>
     <h1 class="hero__title">${film.title.split(' ').map((w, k) => `<span class="hero__word"><span style="--k:${k}">${esc(w)}</span></span>`).join(' ')}</h1>
-    <p class="hero__original">${esc(film.original)} · ${esc(film.director)}</p>
+    <p class="hero__original">Directed by ${esc(film.director)} · ${esc(film.country)}</p>
     <div class="hero__meta">
       <span class="badge badge--age" data-age="${film.age}">${film.age}</span>
       ${film.rating ? `<span class="badge badge--rating">${icon('star')} ${film.rating.toFixed(1)}</span>` : ''}
@@ -26,16 +26,16 @@ function heroContent(film, i) {
     <p class="hero__text">${esc(film.short)}</p>
     <div class="hero__actions">
       ${film.status === 'now'
-        ? `<a class="btn btn--primary btn--lg" href="#/film/${film.id}?buy=1">${icon('ticket')} Купить билеты</a>`
+        ? `<a class="btn btn--primary btn--lg" href="#/film/${film.id}?buy=1">${icon('ticket')} Buy tickets</a>`
         : notifyButton(film, 'btn btn--primary btn--lg')}
-      <a class="btn btn--ghost btn--lg" href="#/film/${film.id}">Подробнее</a>
-      <button class="btn btn--quiet btn--lg hero__trailer" type="button" data-trailer="${film.id}"><span class="play-dot">${icon('play')}</span> Трейлер</button>
+      <a class="btn btn--ghost btn--lg" href="#/film/${film.id}">Details</a>
+      <button class="btn btn--quiet btn--lg hero__trailer" type="button" data-trailer="${film.id}"><span class="play-dot">${icon('play')}</span> Trailer</button>
     </div>`;
 }
 
 function heroSection(films) {
   return html`
-  <section class="hero" data-hero aria-roledescription="карусель" aria-label="Главные фильмы недели">
+  <section class="hero" data-hero aria-roledescription="carousel" aria-label="Films of the week">
     <div class="hero__slides">
       ${films.map((f, i) => `<div class="hero__slide${i === 0 ? ' is-active' : ''}" data-slide="${i}" aria-hidden="${i !== 0}">${poster(f, { variant: 'wide', label: false })}</div>`)}
     </div>
@@ -43,7 +43,7 @@ function heroSection(films) {
     <div class="hero__beam" aria-hidden="true"></div>
     <div class="wrap hero__inner">
       <div class="hero__content" data-hero-content aria-live="polite">${heroContent(films[0], 0)}</div>
-      <div class="hero__queue" role="tablist" aria-label="Выбор фильма">
+      <div class="hero__queue" role="tablist" aria-label="Choose a film">
         ${films.map((f, i) => html`<button class="hero__thumb${i === 0 ? ' is-active' : ''}" type="button" role="tab" data-go="${i}" aria-selected="${i === 0}" aria-label="${esc(f.title)}">
           <span class="hero__thumb-img">${poster(f, { title: false, label: false })}</span>
           <span class="hero__thumb-text"><small>0${i + 1}</small>${esc(f.title)}</span>
@@ -54,15 +54,15 @@ function heroSection(films) {
     <div class="hero__controls wrap">
       <span class="hero__counter tnum"><b data-hero-index>01</b> / 0${films.length}</span>
       <div class="rail-nav">
-        <button type="button" data-hero-prev aria-label="Предыдущий фильм">${icon('arrowLeft')}</button>
-        <button type="button" data-hero-next aria-label="Следующий фильм">${icon('arrowRight')}</button>
+        <button type="button" data-hero-prev aria-label="Previous film">${icon('arrowLeft')}</button>
+        <button type="button" data-hero-next aria-label="Next film">${icon('arrowRight')}</button>
       </div>
     </div>
   </section>`;
 }
 
 function offersStrip() {
-  return html`<section class="offers wrap" aria-label="Актуальные предложения">
+  return html`<section class="offers wrap" aria-label="Current offers">
     ${OFFERS.map((o, i) => html`<a class="offer" href="${o.href}" data-reveal style="--d:${i * 90}ms">
       <span class="offer__icon">${icon(o.icon)}</span>
       <span><b>${o.title}</b><span>${o.text}</span></span>
@@ -85,8 +85,8 @@ function todaySessions() {
   <section class="section section--tight">
     <div class="wrap">
       <div class="section__head">
-        <div><p class="eyebrow">${tomorrow ? 'Завтра в залах' : 'Сегодня в залах'}</p><h2>Ближайшие сеансы</h2></div>
-        <a class="link-arrow" href="#/schedule${tomorrow ? `?date=${date}` : ''}">Полное расписание ${icon('arrowRight')}</a>
+        <div><p class="eyebrow">${tomorrow ? 'Tomorrow at the cinema' : 'Today at the cinema'}</p><h2>Next showtimes</h2></div>
+        <a class="link-arrow" href="#/schedule${tomorrow ? `?date=${date}` : ''}">Full schedule ${icon('arrowRight')}</a>
       </div>
       <div class="next-sessions">
         ${list.map((s, i) => {
@@ -95,8 +95,8 @@ function todaySessions() {
           return html`<a class="next-session" href="#/session/${s.id}" data-reveal style="--d:${(i % 4) * 60}ms">
             <span class="next-session__time tnum">${s.time}</span>
             <span class="next-session__poster">${poster(film, { title: false, label: false })}</span>
-            <span class="next-session__info"><b>${esc(film.title)}</b><span>${hall.number} зал «${hall.name}» · <em class="badge badge--fmt" data-fmt="${s.format}">${s.format}</em></span></span>
-            <span class="next-session__price">от ${price(s.price)}</span>
+            <span class="next-session__info"><b>${esc(film.title)}</b><span>Room ${hall.number} · ${hall.name} · <em class="badge badge--fmt" data-fmt="${s.format}">${s.format}</em></span></span>
+            <span class="next-session__price">from ${price(s.price)}</span>
           </a>`;
         })}
       </div>
@@ -110,8 +110,8 @@ function soonSection() {
   <section class="section soon-section">
     <div class="wrap">
       <div class="section__head">
-        <div><p class="eyebrow">Скоро в кино</p><h2>Премьеры, которых <em class="italic red">ждут</em></h2></div>
-        <a class="link-arrow" href="#/afisha?genre=soon">Все премьеры ${icon('arrowRight')}</a>
+        <div><p class="eyebrow">Coming soon</p><h2>Premieres worth <em class="italic red">waiting</em> for</h2></div>
+        <a class="link-arrow" href="#/afisha?genre=soon">All premieres ${icon('arrowRight')}</a>
       </div>
       <div class="soon-grid">
         ${soon.map((f, i) => html`<article class="soon-card" data-reveal style="--d:${i * 80}ms">
@@ -120,7 +120,7 @@ function soonSection() {
             <p class="soon-card__date"><span class="tnum">${formatDate(f.premiere)}</span><small>${relativeDays(f.premiere)}</small></p>
             <h3><a href="#/film/${f.id}">${esc(f.title)}</a></h3>
             <p class="muted">${esc(f.short)}</p>
-            <p class="soon-card__expect">${icon('users')} Ждут ${f.expect.toLocaleString('ru-RU')} зрителей</p>
+            <p class="soon-card__expect">${icon('users')} ${f.expect.toLocaleString('en-US')} people waiting</p>
             ${notifyButton(f)}
           </div>
         </article>`)}
@@ -134,8 +134,8 @@ function collectionsSection() {
   <section class="section">
     <div class="wrap">
       <div class="section__head">
-        <div><p class="eyebrow">Подборки</p><h2>Под настроение</h2></div>
-        <p class="lead">Собрали фильмы в тематические программы — от полуночных хорроров до тёплых историй для всей семьи.</p>
+        <div><p class="eyebrow">Collections</p><h2>Pick a mood</h2></div>
+        <p class="lead">Films grouped into themed programmes — from midnight horror to warm stories for the whole family.</p>
       </div>
       <div class="collections">
         ${Object.entries(COLLECTIONS).map(([key, c], i) => {
@@ -143,10 +143,10 @@ function collectionsSection() {
           return html`<a class="collection collection--${c.tone}" href="#/afisha?collection=${key}" data-reveal style="--d:${i * 80}ms">
             <div class="collection__fan" aria-hidden="true">${films.map((f, k) => `<span style="--k:${k}">${poster(f, { title: false, label: false })}</span>`)}</div>
             <div class="collection__text">
-              <span class="collection__count">${c.films.length} фильмов</span>
+              <span class="collection__count">${c.films.length} films</span>
               <h3>${c.title}</h3>
               <p>${c.text}</p>
-              <span class="link-arrow">Смотреть подборку ${icon('arrowRight')}</span>
+              <span class="link-arrow">View collection ${icon('arrowRight')}</span>
             </div>
           </a>`;
         })}
@@ -162,13 +162,13 @@ function hallsTeaser() {
       <div class="halls-teaser__panel" data-reveal>
         <div class="halls-teaser__art">${hallScene({ tone: '#5a0f17', gold: true })}</div>
         <div class="halls-teaser__text">
-          <p class="eyebrow">Четыре зала</p>
-          <h2>Темнота, которую <em class="italic gold">слышно</em></h2>
-          <p class="lead">IMAX с экраном 26 метров, камерный VIP-зал на сорок реклайнеров и «Кадр 13» для полуночных показов.</p>
+          <p class="eyebrow">Four rooms</p>
+          <h2>Darkness you can <em class="italic gold">hear</em></h2>
+          <p class="lead">IMAX with a 26-metre screen, an intimate VIP room with forty recliners and Frame 13 for midnight shows.</p>
           <ul class="halls-teaser__list">
-            ${HALLS.map((h) => `<li><span class="badge badge--fmt" data-fmt="${h.kind === 'VIP' ? 'VIP' : h.kind === 'IMAX' ? 'IMAX' : '2D'}">${h.kind}</span><b>${h.number} · «${h.name}»</b><span class="muted">${hallCapacity(h)} мест</span></li>`)}
+            ${HALLS.map((h) => `<li><span class="badge badge--fmt" data-fmt="${h.kind === 'VIP' ? 'VIP' : h.kind === 'IMAX' ? 'IMAX' : '2D'}">${h.kind}</span><b>${h.number} · ${h.name}</b><span class="muted">${hallCapacity(h)} seats</span></li>`)}
           </ul>
-          <a class="btn btn--ghost" href="#/halls">Познакомиться с залами ${icon('arrowRight')}</a>
+          <a class="btn btn--ghost" href="#/halls">Explore the rooms ${icon('arrowRight')}</a>
         </div>
       </div>
     </div>
@@ -180,15 +180,15 @@ function reviewsSection() {
   <section class="section section--tight">
     <div class="wrap">
       <div class="section__head">
-        <div><p class="eyebrow">Отзывы зрителей</p><h2>После титров</h2></div>
-        <div class="rail-nav"><button type="button" data-rail-prev="reviews" aria-label="Назад">${icon('arrowLeft')}</button><button type="button" data-rail-next="reviews" aria-label="Вперёд">${icon('arrowRight')}</button></div>
+        <div><p class="eyebrow">Audience reviews</p><h2>After the credits</h2></div>
+        <div class="rail-nav"><button type="button" data-rail-prev="reviews" aria-label="Back">${icon('arrowLeft')}</button><button type="button" data-rail-next="reviews" aria-label="Forward">${icon('arrowRight')}</button></div>
       </div>
       <div class="rail reviews-rail" data-rail="reviews">
         ${REVIEWS.map((r, i) => html`<figure class="review" data-reveal style="--d:${i * 70}ms">
           <span class="review__quote">${icon('quote')}</span>
           ${starsView(r.rating)}
           <blockquote>${esc(r.text)}</blockquote>
-          <figcaption><b>${esc(r.name)}</b><span>о фильме «${esc(r.film)}»</span></figcaption>
+          <figcaption><b>${esc(r.name)}</b><span>on “${esc(r.film)}”</span></figcaption>
         </figure>`)}
       </div>
     </div>
@@ -200,10 +200,10 @@ function faqSection() {
   <section class="section">
     <div class="wrap faq-teaser">
       <div>
-        <p class="eyebrow">Вопросы</p>
-        <h2>Перед сеансом</h2>
-        <p class="lead">Возврат билетов, возрастные ограничения, парковка и всё, что стоит знать до того, как погаснет свет.</p>
-        <a class="link-arrow" href="#/faq" style="margin-top:24px">Все вопросы и ответы ${icon('arrowRight')}</a>
+        <p class="eyebrow">Questions</p>
+        <h2>Before the show</h2>
+        <p class="lead">Refunds, age ratings, parking and everything worth knowing before the lights go down.</p>
+        <a class="link-arrow" href="#/faq" style="margin-top:24px">All questions & answers ${icon('arrowRight')}</a>
       </div>
       <div data-acc-root>${accordion(FAQ.slice(0, 4))}</div>
     </div>
@@ -216,17 +216,17 @@ function newsletter() {
     <div class="wrap">
       <div class="newsletter" data-reveal>
         <div>
-          <p class="eyebrow">Рассылка</p>
-          <h2>Узнавайте о премьерах первыми</h2>
-          <p class="muted">Раз в неделю — новые фильмы, полуночные показы и закрытые предпоказы. Без спама.</p>
+          <p class="eyebrow">Newsletter</p>
+          <h2>Hear about premieres first</h2>
+          <p class="muted">Once a week — new films, midnight shows and private previews. No spam.</p>
         </div>
         <form class="newsletter__form" data-news novalidate>
           <div class="field">
-            <label class="visually-hidden" for="news-email">Электронная почта</label>
+            <label class="visually-hidden" for="news-email">Email</label>
             <div class="input-group">${icon('mail')}<input class="input" id="news-email" type="email" name="email" placeholder="your@email.com" autocomplete="email" required></div>
             <span class="field__error" role="alert"></span>
           </div>
-          <button class="btn btn--primary btn--lg" type="submit">Подписаться</button>
+          <button class="btn btn--primary btn--lg" type="submit">Subscribe</button>
         </form>
       </div>
     </div>
@@ -244,10 +244,10 @@ export default async function home({ scope }) {
     <section class="section">
       <div class="wrap">
         <div class="section__head">
-          <div><p class="eyebrow">Сейчас в прокате</p><h2>Популярное этой недели</h2></div>
+          <div><p class="eyebrow">Now showing</p><h2>Popular this week</h2></div>
           <div class="section__tools">
-            <a class="link-arrow" href="#/afisha?genre=now">Вся афиша ${icon('arrowRight')}</a>
-            <div class="rail-nav"><button type="button" data-rail-prev="now" aria-label="Прокрутить назад">${icon('arrowLeft')}</button><button type="button" data-rail-next="now" aria-label="Прокрутить вперёд">${icon('arrowRight')}</button></div>
+            <a class="link-arrow" href="#/afisha?genre=now">All films ${icon('arrowRight')}</a>
+            <div class="rail-nav"><button type="button" data-rail-prev="now" aria-label="Scroll back">${icon('arrowLeft')}</button><button type="button" data-rail-next="now" aria-label="Scroll forward">${icon('arrowRight')}</button></div>
           </div>
         </div>
         <div class="rail" data-rail="now">${nowShowing.slice(0, 10).map((f, i) => filmCard(f, { index: i }))}</div>
@@ -262,7 +262,7 @@ export default async function home({ scope }) {
     ${newsletter()}
   `, { flush: true });
 
-  /* ---- Карусель на первом экране ---- */
+  /* ---- Hero carousel ---- */
   const hero = $('[data-hero]', root);
   const slides = $$('[data-slide]', hero);
   const thumbs = $$('[data-go]', hero);
@@ -323,7 +323,7 @@ export default async function home({ scope }) {
     touchX = null;
   });
 
-  /* ---- Горизонтальные ленты ---- */
+  /* ---- Horizontal rails ---- */
   root.addEventListener('click', (e) => {
     const prev = e.target.closest('[data-rail-prev]');
     const next = e.target.closest('[data-rail-next]');
@@ -335,7 +335,7 @@ export default async function home({ scope }) {
 
   bindAccordion($('[data-acc-root]', root));
 
-  /* ---- Рассылка ---- */
+  /* ---- Newsletter ---- */
   const form = $('[data-news]', root);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -346,7 +346,7 @@ export default async function home({ scope }) {
     try {
       await subscribeNews(form.email.value);
       form.reset();
-      toast('Вы подписаны на рассылку', { type: 'success', text: 'Первое письмо придёт в четверг — вместе с новой афишей.' });
+      toast('You’re subscribed', { type: 'success', text: 'Your first email arrives on Thursday — together with the new line-up.' });
     } catch (err) {
       fieldEl.classList.add('is-invalid');
       fieldEl.querySelector('.field__error').textContent = err.message;

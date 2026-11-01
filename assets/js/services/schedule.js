@@ -1,6 +1,6 @@
-// Генерация расписания, цен и занятости мест.
-// Расписание детерминировано: для одной и той же даты всегда получается одна и та же сетка сеансов.
-// При подключении backend этот модуль заменяется запросами к API (см. services/api.js).
+// Generates showtimes, prices and seat occupancy.
+// The schedule is deterministic: the same date always produces the same grid of shows.
+// With a real backend this module is replaced by API calls (see services/api.js).
 
 import { FILMS, getFilmById } from '../data/films.js';
 import { HALLS, FORMAT_INFO, getHallById, seatType } from '../data/halls.js';
@@ -48,7 +48,7 @@ export function sessionPrice(format, startMin, dateISO) {
 
 const cache = new Map();
 
-/** Все сеансы на дату (по всем залам), отсортированные по времени. */
+/** All shows for a date (every room), sorted by time. */
 export function sessionsForDate(dateISO) {
   if (cache.has(dateISO)) return cache.get(dateISO);
   const date = parseISO(dateISO);
@@ -70,7 +70,7 @@ export function sessionsForDate(dateISO) {
 
       if (!candidates.length) { t += 30; continue; }
 
-      // Поздние сеансы в «Кадре 13» — время хорроров
+      // Late shows in Frame 13 are horror time
       const late = hall.id === 'h4' && t >= 22 * 60 + 30;
       const weighted = candidates.map((c) => ({
         ...c,
@@ -115,13 +115,13 @@ export function findSession(id) {
   return sessionsForDate(p.date).find((s) => s.id === id) || null;
 }
 
-/** Время начала сеанса как Date. */
+/** Show start time as a Date. */
 export function sessionDate(session) {
   const d = parseISO(session.date);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(session.start / 60), session.start % 60);
 }
 
-/** Статус продаж: open | closing | closed */
+/** Sales status: open | closing | closed */
 export function salesState(session, now = new Date()) {
   const diff = (sessionDate(session) - now) / 60000;
   if (diff < 10) return 'closed';
@@ -129,7 +129,7 @@ export function salesState(session, now = new Date()) {
   return 'open';
 }
 
-/** Схема зала: массив рядов с креслами. */
+/** Seating plan: an array of rows with seats. */
 export function buildSeatMap(hall) {
   return hall.rows.map((row, ri) => {
     const rowNumber = ri + 1;
@@ -148,7 +148,7 @@ export function buildSeatMap(hall) {
   });
 }
 
-/** Детерминированно «проданные» места для сеанса. */
+/** Deterministically “sold” seats for a show. */
 export function seededOccupied(session) {
   const hall = getHallById(session.hallId);
   const film = getFilmById(session.filmId);
@@ -164,7 +164,7 @@ export function seededOccupied(session) {
   const total = map.length;
   const occupied = new Set();
   map.forEach((row) => {
-    const rowCenter = 1 - Math.abs(row.number - total * 0.6) / total; // середина зала популярнее
+    const rowCenter = 1 - Math.abs(row.number - total * 0.6) / total; // the middle of the room is more popular
     row.seats.forEach((seat) => {
       const center = 1 - Math.abs(seat.num - (row.seats.length + 1) / 2) / row.seats.length;
       const p = ratio * (0.55 + rowCenter * 0.5 + center * 0.45);

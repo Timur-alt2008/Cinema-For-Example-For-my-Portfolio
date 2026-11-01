@@ -1,4 +1,4 @@
-// Точка входа приложения Cinema Example.
+// Cinema Example application entry point.
 
 import { startRouter } from './router.js';
 import { renderHeader, renderFooter, setActiveNav, closeMobileMenu } from './components/shell.js';
@@ -40,14 +40,14 @@ const routes = [
   { path: '*', render: notFound, nav: '' },
 ];
 
-/* ------------------------------- Глобальные действия ------------------ */
+/* ------------------------------- Global actions ----------------------- */
 
 function syncFavButtons(id, active) {
   document.querySelectorAll(`[data-fav="${id}"]`).forEach((b) => {
     b.classList.toggle('is-active', active);
     b.setAttribute('aria-pressed', String(active));
     const film = getFilmById(id);
-    b.setAttribute('aria-label', `${active ? 'Убрать из избранного' : 'Добавить в избранное'}: ${film?.title || ''}`);
+    b.setAttribute('aria-label', `${active ? 'Remove from favourites' : 'Add to favourites'}: ${film?.title || ''}`);
   });
 }
 
@@ -57,7 +57,7 @@ function syncNotifyButtons(id, on) {
     const label = b.querySelector('span');
     if (label) {
       const short = b.classList.contains('btn--sm') && b.closest('.film-card');
-      label.textContent = short ? (on ? 'Напомним' : 'Напомнить') : (on ? 'Напомним о премьере' : 'Напомнить о премьере');
+      label.textContent = short ? (on ? 'Reminder on' : 'Remind me') : (on ? 'Reminder set' : 'Remind me at premiere');
     }
   });
 }
@@ -73,7 +73,7 @@ document.addEventListener('click', (e) => {
     void fav.offsetWidth;
     fav.classList.add('pop');
     const film = getFilmById(id);
-    toast(active ? 'Добавлено в избранное' : 'Удалено из избранного', { text: film?.title, iconName: 'heart', type: active ? 'success' : 'info', timeout: 2600 });
+    toast(active ? 'Added to favourites' : 'Removed from favourites', { text: film?.title, iconName: 'heart', type: active ? 'success' : 'info', timeout: 2600 });
     return;
   }
   const notify = e.target.closest('[data-notify]');
@@ -83,8 +83,8 @@ document.addEventListener('click', (e) => {
     const on = premiereAlerts.toggle(id);
     syncNotifyButtons(id, on);
     const film = getFilmById(id);
-    toast(on ? 'Напомним о премьере' : 'Напоминание отключено', {
-      text: on && film ? `«${film.title}» — ${formatDate(film.premiere)}. Сообщим, когда откроется продажа билетов.` : film?.title,
+    toast(on ? 'We’ll remind you at the premiere' : 'Reminder turned off', {
+      text: on && film ? `“${film.title}” — ${formatDate(film.premiere)}. We’ll let you know when tickets go on sale.` : film?.title,
       iconName: 'bell',
       type: on ? 'success' : 'info',
     });
@@ -97,7 +97,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-/* ------------------------------- Запуск ------------------------------- */
+/* ------------------------------- Start -------------------------------- */
 
 const progress = document.querySelector('.route-progress');
 let progressTimer;
@@ -146,7 +146,7 @@ window.addEventListener('error', (e) => {
 });
 window.addEventListener('unhandledrejection', (e) => {
   console.error(e.reason);
-  toast('Что-то пошло не так', { type: 'error', text: 'Попробуйте ещё раз — мы уже перематываем плёнку.' });
+  toast('Something went wrong', { type: 'error', text: 'Please try again — we’re already rewinding the reel.' });
 });
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

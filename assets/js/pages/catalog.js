@@ -9,17 +9,17 @@ import { replaceQuery } from '../router.js';
 import { plural } from '../lib/format.js';
 
 const FILTERS = [
-  { key: 'all', label: 'Все фильмы' },
-  { key: 'now', label: 'Сейчас в прокате' },
-  { key: 'soon', label: 'Скоро в кино' },
-  ...Object.entries(GENRES).map(([key, label]) => ({ key, label: label === 'Хоррор' ? 'Хорроры' : label === 'Триллер' ? 'Триллеры' : label === 'Боевик' ? 'Боевики' : label === 'Драма' ? 'Драмы' : label === 'Комедия' ? 'Комедии' : label === 'Мультфильм' ? 'Мультфильмы' : label })),
+  { key: 'all', label: 'All films' },
+  { key: 'now', label: 'Now showing' },
+  { key: 'soon', label: 'Coming soon' },
+  ...Object.entries(GENRES).map(([key, label]) => ({ key, label: key === 'thriller' ? 'Thrillers' : key === 'drama' ? 'Dramas' : key === 'comedy' ? 'Comedies' : label })),
 ];
 
 const SORTS = [
-  { key: 'popular', label: 'По популярности' },
-  { key: 'rating', label: 'По рейтингу' },
-  { key: 'date', label: 'Сначала новые премьеры' },
-  { key: 'soonest', label: 'Сначала ранние премьеры' },
+  { key: 'popular', label: 'Most popular' },
+  { key: 'rating', label: 'Highest rated' },
+  { key: 'date', label: 'Newest premieres' },
+  { key: 'soonest', label: 'Earliest premieres' },
 ];
 
 function countFor(key) {
@@ -27,7 +27,7 @@ function countFor(key) {
 }
 
 export default async function catalog({ query, scope, isCurrent }) {
-  setTitle('Киноафиша');
+  setTitle('Films');
   const state = {
     q: query.q || '',
     genre: FILTERS.some((f) => f.key === query.genre) ? query.genre : 'all',
@@ -38,31 +38,31 @@ export default async function catalog({ query, scope, isCurrent }) {
 
   const root = mount(html`
     ${pageHero({
-      trail: [{ label: 'Афиша' }],
-      eyebrow: coll ? 'Подборка' : `${FILMS.length} фильмов в программе`,
-      title: coll ? esc(coll.title) : 'Киноафиша',
-      lead: coll ? esc(coll.text) : 'Психологические триллеры, хорроры и большие премьеры. Ищите по названию, режиссёру или актёру и сортируйте так, как удобно.',
+      trail: [{ label: 'Films' }],
+      eyebrow: coll ? 'Collection' : `${FILMS.length} films in the programme`,
+      title: coll ? esc(coll.title) : 'What’s on',
+      lead: coll ? esc(coll.text) : 'Psychological thrillers, horror and big premieres. Search by title, director or actor and sort however you like.',
     })}
     <section class="wrap catalog">
       <div class="catalog__bar">
         <form class="catalog__search" role="search" data-search>
           <div class="input-group">
             ${icon('search')}
-            <input class="input" type="search" name="q" value="${esc(state.q)}" placeholder="Название, режиссёр или актёр" aria-label="Поиск фильма" autocomplete="off">
-            <button class="input-group__clear" type="button" data-clear aria-label="Очистить поиск" ${state.q ? '' : 'hidden'}>${icon('close')}</button>
+            <input class="input" type="search" name="q" value="${esc(state.q)}" placeholder="Title, director or actor" aria-label="Search for a film" autocomplete="off">
+            <button class="input-group__clear" type="button" data-clear aria-label="Clear search" ${state.q ? '' : 'hidden'}>${icon('close')}</button>
           </div>
         </form>
         <label class="catalog__sort">
-          <span class="visually-hidden">Сортировка</span>
-          <select class="select" data-sort aria-label="Сортировка">
+          <span class="visually-hidden">Sort</span>
+          <select class="select" data-sort aria-label="Sort">
             ${SORTS.map((s) => `<option value="${s.key}" ${s.key === state.sort ? 'selected' : ''}>${s.label}</option>`)}
           </select>
         </label>
       </div>
-      <div class="chips catalog__filters" role="group" aria-label="Фильтр по жанру и статусу">
+      <div class="chips catalog__filters" role="group" aria-label="Filter by genre and status">
         ${FILTERS.map((f) => `<button class="chip" type="button" data-genre="${f.key}" aria-pressed="${f.key === state.genre}">${f.label} <span class="chip__count">${countFor(f.key)}</span></button>`)}
       </div>
-      ${coll ? `<div class="catalog__coll"><span class="badge badge--gold">${icon('sparkle')} Подборка: ${esc(coll.title)}</span><a class="link-arrow" href="#/afisha" data-reset-coll>Показать все фильмы ${icon('close')}</a></div>` : ''}
+      ${coll ? `<div class="catalog__coll"><span class="badge badge--gold">${icon('sparkle')} Collection: ${esc(coll.title)}</span><a class="link-arrow" href="#/afisha" data-reset-coll>Show all films ${icon('close')}</a></div>` : ''}
       <p class="catalog__count muted" data-count aria-live="polite"></p>
       <div data-results>${skeletonCards(8)}</div>
     </section>
@@ -85,16 +85,16 @@ export default async function catalog({ query, scope, isCurrent }) {
       results.style.opacity = '';
       results.removeAttribute('aria-busy');
       countEl.textContent = list.length
-        ? `Найдено ${list.length} ${plural(list.length, ['фильм', 'фильма', 'фильмов'])}${state.q ? ` по запросу «${state.q}»` : ''}`
+        ? `${list.length} ${plural(list.length, ['film', 'films'])} found${state.q ? ` for “${state.q}”` : ''}`
         : '';
       if (!list.length) {
         results.innerHTML = emptyState({
           iconName: 'search',
-          title: 'Ничего не нашлось',
+          title: 'Nothing found',
           text: state.q
-            ? `По запросу «${esc(state.q)}» в выбранной категории фильмов нет. Проверьте написание или сбросьте фильтры.`
-            : 'В этой категории пока нет фильмов. Загляните в раздел «Скоро в кино» — афиша обновляется каждую неделю.',
-          action: '<button class="btn btn--ghost" type="button" data-reset>Сбросить фильтры</button>',
+            ? `No films match “${esc(state.q)}” in this category. Check the spelling or reset the filters.`
+            : 'No films in this category yet. Take a look at Coming Soon — the line-up is updated every week.',
+          action: '<button class="btn btn--ghost" type="button" data-reset>Reset filters</button>',
         });
         return;
       }

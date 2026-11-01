@@ -1,5 +1,5 @@
-// Детерминированный генератор случайных чисел: одинаковые входные данные —
-// одинаковое расписание, занятые места и звёзды на постерах при каждом открытии.
+// Deterministic random generator: the same input always gives the same
+// schedule, occupied seats and poster stars on every visit.
 
 export function hashString(str) {
   let h1 = 0xdeadbeef ^ 0, h2 = 0x41c6ce57 ^ 0;

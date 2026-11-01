@@ -1,6 +1,6 @@
-// Хранилище состояния приложения.
-// Данные живут в localStorage (если он доступен) и в памяти — так сайт работает
-// даже в приватном режиме браузера. Ключи с префиксом, чтобы не пересекаться с другими сайтами.
+// Application state store.
+// Data lives in localStorage (when available) and in memory, so the site still works
+// in private browsing. Keys are prefixed to avoid clashing with other sites.
 
 const PREFIX = 'cinema-example:';
 const memory = new Map();
@@ -20,7 +20,7 @@ function writeRaw(key, value) {
     if (value === undefined) localStorage.removeItem(PREFIX + key);
     else localStorage.setItem(PREFIX + key, JSON.stringify(value));
   } catch (e) {
-    /* хранилище недоступно — остаёмся на памяти */
+    /* storage unavailable — keep it in memory */
   }
 }
 
@@ -61,7 +61,7 @@ export const store = {
   },
 };
 
-// Синхронизация между вкладками
+// Sync between tabs
 try {
   window.addEventListener('storage', (e) => {
     if (!e.key || !e.key.startsWith(PREFIX)) return;
@@ -71,7 +71,7 @@ try {
   });
 } catch (e) { /* noop */ }
 
-/* ---------------- Избранное и подписки на премьеры ---------------- */
+/* ---------------- Favourites and premiere alerts ---------------- */
 
 export const favorites = {
   list: () => store.get('favorites', []),

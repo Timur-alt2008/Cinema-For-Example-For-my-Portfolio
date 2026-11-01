@@ -1,9 +1,9 @@
 /* ==========================================================================
-   Cinema Example — базовые токены, сброс, типографика
+   Cinema Example — base tokens, reset, typography
    ========================================================================== */
 
 :root {
-  /* Палитра */
+  /* Palette */
   --c-black: #090909;
   --c-coal: #151313;
   --c-coal-2: #1c1919;
@@ -28,12 +28,12 @@
   --warn: #c9a24f;
   --err: #d0414e;
 
-  /* Типографика */
+  /* Typography */
   --f-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
   --f-ui: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --f-cond: "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif;
 
-  /* Размеры и ритм */
+  /* Sizes and rhythm */
   --wrap: 1280px;
   --gutter: clamp(16px, 4vw, 40px);
   --header-h: 76px;
@@ -105,7 +105,7 @@ table { border-collapse: collapse; }
   border-radius: 6px;
 }
 
-/* Типографика */
+/* Typography */
 .display, h1, h2, h3 {
   font-family: var(--f-display);
   font-weight: 600;
@@ -146,7 +146,7 @@ h4 { font-family: var(--f-ui); font-size: 1rem; font-weight: 700; }
 .nowrap { white-space: nowrap; }
 .tnum { font-variant-numeric: tabular-nums; }
 
-/* Макет */
+/* Layout */
 .wrap {
   width: 100%;
   max-width: calc(var(--wrap) + var(--gutter) * 2);
@@ -207,7 +207,7 @@ h4 { font-family: var(--f-ui); font-size: 1rem; font-weight: 700; }
 }
 .skip-link:focus { top: 16px; }
 
-/* Плёночное зерно поверх всего — едва заметно */
+/* Subtle film grain over everything */
 .grain {
   position: fixed;
   inset: -50%;
@@ -226,7 +226,7 @@ h4 { font-family: var(--f-ui); font-size: 1rem; font-weight: 700; }
   100% { transform: translate(0, 0); }
 }
 
-/* Появление при прокрутке */
+/* Scroll reveal */
 [data-reveal] {
   opacity: 0;
   transform: translateY(28px);
@@ -235,7 +235,7 @@ h4 { font-family: var(--f-ui); font-size: 1rem; font-weight: 700; }
 }
 [data-reveal].is-in { opacity: 1; transform: none; }
 
-/* Загрузка приложения */
+/* App loading */
 .boot {
   min-height: 70vh;
   display: grid;

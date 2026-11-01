@@ -4,7 +4,7 @@ import { icon } from '../icons.js';
 
 export const main = () => document.getElementById('main');
 
-/** Вставляет разметку страницы с анимацией появления. */
+/** Mounts page markup with an entrance animation. */
 export function mount(markup, { flush = false } = {}) {
   const el = main();
   el.classList.toggle('page--flush', flush);
@@ -19,8 +19,8 @@ export function mount(markup, { flush = false } = {}) {
 }
 
 export function crumbs(items) {
-  return html`<nav class="crumbs" aria-label="Навигационная цепочка">
-    <a href="#/">Главная</a>
+  return html`<nav class="crumbs" aria-label="Breadcrumbs">
+    <a href="#/">Home</a>
     ${items.map((it) => html`<span aria-hidden="true">/</span>${it.href ? `<a href="${it.href}">${esc(it.label)}</a>` : `<span aria-current="page">${esc(it.label)}</span>`}`)}
   </nav>`;
 }
@@ -39,13 +39,13 @@ export function pageHero({ trail = [], eyebrow = '', title, lead = '', aside = '
   </section>`;
 }
 
-export function loadingView(text = 'Загружаем…') {
+export function loadingView(text = 'Loading…') {
   return html`<div class="wrap section"><div class="boot"><div class="boot__mark"></div><p>${text}</p></div></div>`;
 }
 
 export function stepsBar(current) {
-  const steps = ['Сеанс', 'Места', 'Оформление', 'Билет'];
-  return html`<ol class="steps" aria-label="Этапы покупки">
+  const steps = ['Showtime', 'Seats', 'Checkout', 'Ticket'];
+  return html`<ol class="steps" aria-label="Checkout steps">
     ${steps.map((s, i) => html`${i ? '<li class="steps__line" aria-hidden="true"></li>' : ''}
       <li class="step ${i < current ? 'is-done' : ''} ${i === current ? 'is-current' : ''}" ${i === current ? 'aria-current="step"' : ''}>
         <span class="step__n">${i < current ? icon('check') : i + 1}</span>${s}
@@ -54,5 +54,5 @@ export function stepsBar(current) {
 }
 
 export function setTitle(t) {
-  document.title = t ? `${t} — Cinema Example` : 'Cinema Example — кинотеатр психологических триллеров и хорроров';
+  document.title = t ? `${t} — Cinema Example` : 'Cinema Example — a cinema for psychological thrillers and horror';
 }

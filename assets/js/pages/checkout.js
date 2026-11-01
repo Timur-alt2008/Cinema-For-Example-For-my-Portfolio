@@ -10,27 +10,27 @@ import { getBooking } from './seats.js';
 import { formatDate, price, plural } from '../lib/format.js';
 
 const METHODS = [
-  { id: 'card', icon: 'card', title: 'Банковская карта', text: 'Тестовая оплата — деньги не списываются' },
-  { id: 'wallet', icon: 'wallet', title: 'Apple Pay / Google Pay', text: 'Имитация оплаты в один шаг' },
+  { id: 'card', icon: 'card', title: 'Bank card', text: 'Test payment — no money is charged' },
+  { id: 'wallet', icon: 'wallet', title: 'Apple Pay / Google Pay', text: 'One-step simulated payment' },
 ];
 
 export default async function checkout({ scope, isCurrent }) {
-  setTitle('Оформление заказа');
+  setTitle('Checkout');
   const booking = getBooking();
   if (!booking || !booking.seats?.length) {
     mount(html`<section class="wrap section">
       ${stepsBar(2)}
       <div style="margin-top:40px">${emptyState({
         iconName: 'ticket',
-        title: 'Корзина пуста',
-        text: 'Вы ещё не выбрали места или время брони истекло. Выберите сеанс в расписании — это займёт минуту.',
-        action: `<a class="btn btn--primary" href="#/schedule">${icon('calendar')} Открыть расписание</a>`,
+        title: 'Your basket is empty',
+        text: 'You haven’t picked any seats yet, or your hold has expired. Choose a show in the schedule — it only takes a minute.',
+        action: `<a class="btn btn--primary" href="#/schedule">${icon('calendar')} Open showtimes</a>`,
       })}</div>
     </section>`);
     return;
   }
 
-  mount(loadingView('Проверяем, что места всё ещё свободны…'));
+  mount(loadingView('Making sure your seats are still free…'));
   let s;
   try {
     s = await getSessionDetails(booking.sessionId);
@@ -45,7 +45,7 @@ export default async function checkout({ scope, isCurrent }) {
   const seats = booking.seats.map((id) => byId.get(id)).filter(Boolean).sort((a, b) => a.row - b.row || a.num - b.num);
   const taken = seats.filter((x) => x.occupied);
   if (taken.length) {
-    toast('Часть мест уже заняли', { type: 'error', text: 'Выберите, пожалуйста, другие места.' });
+    toast('Some seats have just been taken', { type: 'error', text: 'Please choose other seats.' });
     store.set('booking', { ...booking, seats: booking.seats.filter((id) => !taken.some((t) => t.id === id)) });
     navigate(`/session/${s.id}`, { replace: true });
     return;
@@ -64,31 +64,31 @@ export default async function checkout({ scope, isCurrent }) {
   const root = mount(html`
     <section class="booking wrap">
       <div class="booking__top">
-        <a class="link-arrow link-arrow--back" href="#/session/${s.id}">${icon('arrowLeft')} Изменить места</a>
+        <a class="link-arrow link-arrow--back" href="#/session/${s.id}">${icon('arrowLeft')} Change seats</a>
         ${stepsBar(2)}
       </div>
-      <h1 class="checkout__title">Оформление заказа</h1>
-      <div class="test-banner" role="note">${icon('lock')} <span><b>Тестовый режим.</b> Это демонстрационный сайт: настоящая оплата не подключена, деньги не списываются, данные карты не запрашиваются.</span></div>
+      <h1 class="checkout__title">Checkout</h1>
+      <div class="test-banner" role="note">${icon('lock')} <span><b>Test mode.</b> This is a demo site: no real payment provider is connected, no money is charged and no card details are requested.</span></div>
 
       <div class="checkout__grid">
         <form class="checkout__form" data-form novalidate>
           <fieldset class="panel panel__pad">
-            <legend class="panel__title">1. Контактные данные</legend>
-            <p class="muted fieldset-note">На почту придёт электронный билет, на телефон — напоминание за 2 часа до сеанса.</p>
+            <legend class="panel__title">1. Contact details</legend>
+            <p class="muted fieldset-note">Your e-ticket goes to your email, and a reminder goes to your phone 2 hours before the show.</p>
             <div class="form-grid">
-              ${field({ name: 'firstName', label: 'Имя', required: true, value: pre.firstName, autocomplete: 'given-name', placeholder: 'Анна' })}
-              ${field({ name: 'lastName', label: 'Фамилия', required: true, value: pre.lastName, autocomplete: 'family-name', placeholder: 'Коваленко' })}
-              ${field({ name: 'email', label: 'Электронная почта', type: 'email', required: true, value: pre.email, autocomplete: 'email', placeholder: 'anna@example.com', attrs: 'inputmode="email"' })}
-              ${field({ name: 'phone', label: 'Телефон', type: 'tel', required: true, value: pre.phone, autocomplete: 'tel', placeholder: '+380 67 123 45 67', attrs: 'inputmode="tel"' })}
+              ${field({ name: 'firstName', label: 'First name', required: true, value: pre.firstName, autocomplete: 'given-name', placeholder: 'Anna' })}
+              ${field({ name: 'lastName', label: 'Last name', required: true, value: pre.lastName, autocomplete: 'family-name', placeholder: 'Smith' })}
+              ${field({ name: 'email', label: 'Email', type: 'email', required: true, value: pre.email, autocomplete: 'email', placeholder: 'anna@example.com', attrs: 'inputmode="email"' })}
+              ${field({ name: 'phone', label: 'Phone', type: 'tel', required: true, value: pre.phone, autocomplete: 'tel', placeholder: '+380 67 123 45 67', attrs: 'inputmode="tel"' })}
             </div>
-            ${!user ? `<p class="fieldset-note muted" style="margin-top:16px">${icon('user')} <a class="gold" href="#/login?next=/checkout">Войдите</a>, чтобы билеты сохранились в личном кабинете.</p>` : ''}
+            ${!user ? `<p class="fieldset-note muted" style="margin-top:16px">${icon('user')} <a class="gold" href="#/login?next=/checkout">Sign in</a> to keep your tickets in your account.</p>` : ''}
           </fieldset>
 
           <fieldset class="panel panel__pad">
-            <legend class="panel__title">2. Способ получения</legend>
-            <div class="mode-switch" role="radiogroup" aria-label="Покупка или бронь">
-              <label class="mode"><input type="radio" name="mode" value="pay" checked><span class="mode__box"><b>${icon('ticket')} Купить онлайн</b><small>Электронный билет сразу после оплаты</small></span></label>
-              <label class="mode"><input type="radio" name="mode" value="reserve"><span class="mode__box"><b>${icon('clock')} Забронировать</b><small>Оплата в кассе за 30 минут до сеанса</small></span></label>
+            <legend class="panel__title">2. Purchase option</legend>
+            <div class="mode-switch" role="radiogroup" aria-label="Buy or book">
+              <label class="mode"><input type="radio" name="mode" value="pay" checked><span class="mode__box"><b>${icon('ticket')} Buy online</b><small>E-ticket straight after payment</small></span></label>
+              <label class="mode"><input type="radio" name="mode" value="reserve"><span class="mode__box"><b>${icon('clock')} Book now, pay later</b><small>Pay at the box office 30 minutes before the show</small></span></label>
             </div>
             <div class="methods" data-methods>
               ${METHODS.map((m, i) => `<label class="method"><input type="radio" name="method" value="${m.id}" ${i === 0 ? 'checked' : ''}><span class="method__box">${icon(m.icon)}<span><b>${m.title}</b><small>${m.text}</small></span><span class="badge badge--gold">TEST</span></span></label>`).join('')}
@@ -96,37 +96,37 @@ export default async function checkout({ scope, isCurrent }) {
           </fieldset>
 
           <fieldset class="panel panel__pad">
-            <legend class="panel__title">3. Промокод</legend>
+            <legend class="panel__title">3. Promo code</legend>
             <div class="promo-row">
               <div class="field">
-                <label class="visually-hidden" for="promo">Промокод</label>
-                <input class="input" id="promo" name="promo" placeholder="Например, FAMILY4" autocomplete="off" style="text-transform:uppercase">
+                <label class="visually-hidden" for="promo">Promo code</label>
+                <input class="input" id="promo" name="promo" placeholder="e.g. FAMILY4" autocomplete="off" style="text-transform:uppercase">
                 <span class="field__error" role="alert"></span>
               </div>
-              <button class="btn btn--ghost" type="button" data-apply>Применить</button>
+              <button class="btn btn--ghost" type="button" data-apply>Apply</button>
             </div>
-            <p class="field__hint">Коды и условия — в разделе <a class="gold" href="#/promos">«Акции»</a>.</p>
+            <p class="field__hint">Codes and terms are on the <a class="gold" href="#/promos">Offers</a> page.</p>
           </fieldset>
 
-          <label class="check agree"><input type="checkbox" name="agree"> <span>Соглашаюсь с <a href="#/faq">правилами посещения и возврата</a> и понимаю, что это демонстрационный заказ.</span></label>
-          <span class="field__error agree-error" data-agree-error role="alert">Подтвердите согласие с правилами</span>
+          <label class="check agree"><input type="checkbox" name="agree"> <span>I agree to the <a href="#/faq">visitor and refund rules</a> and understand this is a demo order.</span></label>
+          <span class="field__error agree-error" data-agree-error role="alert">Please accept the rules</span>
         </form>
 
-        <aside class="order-card panel panel--gold" aria-label="Состав заказа">
+        <aside class="order-card panel panel--gold" aria-label="Order summary">
           <div class="order-card__film">
             <div class="order-card__poster">${poster(s.film, { title: false, label: false })}</div>
             <div>
               <h2>${esc(s.film.title)}</h2>
               <p class="muted">${formatDate(s.date, { weekday: true })}, <b class="tnum" style="color:var(--c-text)">${s.time}</b></p>
-              <p class="muted">Зал ${s.hall.number} · «${esc(s.hall.name)}» · <span class="badge badge--fmt" data-fmt="${s.format}">${s.format}</span></p>
+              <p class="muted">Room ${s.hall.number} · ${esc(s.hall.name)} · <span class="badge badge--fmt" data-fmt="${s.format}">${s.format}</span></p>
             </div>
           </div>
           <ul class="order-card__seats">
-            ${seats.map((x) => `<li><span>${x.row} ряд, ${x.num} место${x.type === 'vip' ? ' · <span class="gold">VIP</span>' : ''}</span><span class="tnum">${price(x.price)}</span></li>`).join('')}
+            ${seats.map((x) => `<li><span>Row ${x.row}, seat ${x.num}${x.type === 'vip' ? ' · <span class="gold">VIP</span>' : ''}</span><span class="tnum">${price(x.price)}</span></li>`).join('')}
           </ul>
           <div class="order-card__totals" data-totals></div>
-          <button class="btn btn--primary btn--lg btn--block" type="button" data-submit>${icon('lock')} <span data-submit-label>Оплатить</span></button>
-          <p class="order-card__note muted">${icon('clock')} Места удерживаются за вами до ${new Date(booking.expiresAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</p>
+          <button class="btn btn--primary btn--lg btn--block" type="button" data-submit>${icon('lock')} <span data-submit-label>Pay</span></button>
+          <p class="order-card__note muted">${icon('clock')} Seats are held for you until ${new Date(booking.expiresAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
         </aside>
       </div>
     </section>
@@ -141,11 +141,11 @@ export default async function checkout({ scope, isCurrent }) {
     const t = calcTotals(seats, promo);
     const mode = form.querySelector('[name="mode"]:checked').value;
     totalsEl.innerHTML = html`
-      <div><span>${seats.length} ${plural(seats.length, ['билет', 'билета', 'билетов'])}</span><span class="tnum">${price(t.subtotal)}</span></div>
-      ${promo ? `<div class="gold"><span>Промокод ${promo.code} (−${promo.percent}%) <button type="button" class="link-btn" data-remove-promo aria-label="Убрать промокод">${icon('close')}</button></span><span class="tnum">−${price(t.discount)}</span></div>` : ''}
-      <div><span>Сервисный сбор</span><span class="tnum">0 ₴</span></div>
-      <div class="order-card__sum"><span>${mode === 'reserve' ? 'К оплате в кассе' : 'Итого'}</span><b class="tnum">${price(t.total)}</b></div>`;
-    submitLabel.textContent = mode === 'reserve' ? 'Забронировать места' : `Оплатить ${price(t.total)}`;
+      <div><span>${seats.length} ${plural(seats.length, ['ticket', 'tickets'])}</span><span class="tnum">${price(t.subtotal)}</span></div>
+      ${promo ? `<div class="gold"><span>Promo ${promo.code} (−${promo.percent}%) <button type="button" class="link-btn" data-remove-promo aria-label="Remove promo code">${icon('close')}</button></span><span class="tnum">−${price(t.discount)}</span></div>` : ''}
+      <div><span>Service fee</span><span class="tnum">₴0</span></div>
+      <div class="order-card__sum"><span>${mode === 'reserve' ? 'Due at box office' : 'Total'}</span><b class="tnum">${price(t.total)}</b></div>`;
+    submitLabel.textContent = mode === 'reserve' ? 'Book seats' : `Pay ${price(t.total)}`;
     $('[data-methods]', root).hidden = mode === 'reserve';
   }
   renderTotals();
@@ -162,7 +162,7 @@ export default async function checkout({ scope, isCurrent }) {
     try {
       promo = checkPromo(promoInput.value, { session: s, seatsCount: seats.length });
       fieldEl.classList.remove('is-invalid');
-      toast(`Промокод ${promo.code} применён`, { type: 'success', text: `${promo.title}: скидка ${promo.percent}%` });
+      toast(`Promo code ${promo.code} applied`, { type: 'success', text: `${promo.title}: ${promo.percent}% off` });
     } catch (err) {
       promo = null;
       fieldEl.classList.add('is-invalid');
@@ -185,7 +185,7 @@ export default async function checkout({ scope, isCurrent }) {
     const errors = validateCustomer(customer);
     if (Object.keys(errors).length) {
       showFieldErrors(form, errors);
-      toast('Проверьте контактные данные', { type: 'error' });
+      toast('Please check your contact details', { type: 'error' });
       return;
     }
     if (!form.querySelector('[name="agree"]').checked) {
@@ -194,7 +194,7 @@ export default async function checkout({ scope, isCurrent }) {
       return;
     }
     if (getBooking()?.sessionId !== s.id) {
-      toast('Время брони истекло', { type: 'error', text: 'Выберите места заново.' });
+      toast('Your hold has expired', { type: 'error', text: 'Please choose your seats again.' });
       navigate(`/session/${s.id}`);
       return;
     }
@@ -203,16 +203,16 @@ export default async function checkout({ scope, isCurrent }) {
     setBusy(btn, true);
 
     const steps = mode === 'reserve'
-      ? ['Проверяем свободные места', 'Закрепляем бронь', 'Готовим подтверждение']
-      : ['Проверяем свободные места', 'Тестовая оплата', 'Выпускаем электронный билет'];
+      ? ['Checking seat availability', 'Securing your booking', 'Preparing confirmation']
+      : ['Checking seat availability', 'Test payment', 'Issuing your e-ticket'];
     const modal = openModal({
-      title: mode === 'reserve' ? 'Бронируем места' : 'Оплата заказа',
+      title: mode === 'reserve' ? 'Booking your seats' : 'Processing payment',
       dismissible: false,
-      label: 'Обработка заказа',
+      label: 'Processing order',
       body: html`<div class="processing">
         <div class="processing__reel" aria-hidden="true"></div>
         <ol class="processing__steps">${steps.map((t, i) => `<li data-step="${i}">${icon('check')}<span>${t}</span></li>`).join('')}</ol>
-        <p class="muted">Демо-режим: реальная платёжная система не используется.</p>
+        <p class="muted">Demo mode: no real payment system is used.</p>
       </div>`,
     });
     const mark = (i) => modal.dialog.querySelectorAll('[data-step]').forEach((li) => {
@@ -245,7 +245,7 @@ export default async function checkout({ scope, isCurrent }) {
       setBusy(btn, false);
       if (err.fields) showFieldErrors(form, err.fields);
       if (err.status === 409) {
-        toast('Не получилось оформить заказ', { type: 'error', text: err.message, timeout: 7000 });
+        toast('We couldn’t complete your order', { type: 'error', text: err.message, timeout: 7000 });
         setTimeout(() => navigate(`/session/${s.id}`), 600);
         return;
       }
@@ -253,7 +253,7 @@ export default async function checkout({ scope, isCurrent }) {
         promo = null; renderTotals();
         const f = promoInput.closest('.field'); f.classList.add('is-invalid'); f.querySelector('.field__error').textContent = err.message;
       }
-      toast('Ошибка оформления', { type: 'error', text: err.message });
+      toast('Checkout error', { type: 'error', text: err.message });
     }
   }
 }

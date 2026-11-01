@@ -1,55 +1,55 @@
 # Cinema Example
 
-Демонстрационный сайт премиального кинотеатра в эстетике психологических триллеров и хорроров.
-Проект для портфолио: все фильмы, имена, контакты и отзывы вымышлены, оплата работает в тестовом режиме.
+A demo website for a premium cinema with a psychological-thriller and horror aesthetic.
+Built as a portfolio project: all films, names, contacts and reviews are fictional, and payments run in test mode.
 
-**Живая версия:** https://timur-alt2008.github.io/Cinema-For-Example-For-my-Portfolio/
+**Live site:** https://timur-alt2008.github.io/Cinema-For-Example-For-my-Portfolio/
 
-## Что умеет сайт
+## Features
 
-- **Главная** — кинематографический баннер с переключением фильмов недели, актуальные предложения, популярное, ближайшие сеансы, премьеры, подборки, отзывы, FAQ, подписка.
-- **Киноафиша** — 17 фильмов, рабочие фильтры (в прокате, скоро, 7 жанров), поиск по названию/режиссёру/актёрам, сортировка по популярности, рейтингу и дате премьеры.
-- **Страница фильма** — постер, трейлер (анимированный тизер), описание, режиссёр, актёры, форматы, расписание по дням, отзывы с формой, похожие фильмы.
-- **Расписание** — 8 дней вперёд, фильтры по формату (2D, 3D, IMAX, VIP), времени суток и залу, цены и статус продаж.
-- **Интерактивный выбор мест** — схема зала с экраном, рядами и номерами, свободные/занятые/выбранные/VIP-места, цены, до 8 мест, удержание брони 10 минут, масштаб схемы, удобная мобильная версия.
-- **Оформление заказа** — покупка или бронь, валидация данных, промокоды с условиями, тестовая оплата.
-- **Электронный билет** — QR-код, номер заказа, скачивание (SVG), сохранение в PDF, добавление в календарь (.ics).
-- **Личный кабинет** — регистрация и вход, предстоящие сеансы, история заказов, возврат билетов, избранное, уведомления о премьерах, личные данные.
-- **О кинотеатре, Залы, Акции, Контакты (карта и форма обратной связи), FAQ, страница 404.**
+- **Home** — a cinematic hero with rotating films of the week, current offers, popular films, next showtimes, premieres, collections, reviews, FAQ and newsletter signup.
+- **Films** — 17 films with working filters (now showing, coming soon, 7 genres), search by title/director/cast, and sorting by popularity, rating and premiere date.
+- **Film page** — poster, trailer (animated teaser), synopsis, director, cast, formats, showtimes by day, reviews with a form, similar films.
+- **Showtimes** — 8 days ahead, filters by format (2D, 3D, IMAX, VIP), time of day and room, prices and sales status.
+- **Interactive seat selection** — seating plan with screen, rows and numbers, available/taken/selected/VIP seats, prices, up to 8 seats, a 10-minute hold, zoom controls and a dedicated mobile layout.
+- **Checkout** — buy or book, form validation, promo codes with real conditions, test payment.
+- **E-ticket** — QR code, order number, download (SVG), save as PDF, add to calendar (.ics).
+- **Account** — register and sign in, upcoming shows, order history, refunds, favourites, premiere alerts, personal details.
+- **About, Rooms, Offers, Contact (map and feedback form), FAQ and a 404 page.**
 
-## Технологии
+## Tech
 
-Чистый HTML, CSS и JavaScript (ES-модули) без сборки и зависимостей — сайт открывается на любом статическом хостинге, включая GitHub Pages.
+Plain HTML, CSS and JavaScript (ES modules) — no build step and no dependencies, so the site runs on any static host, including GitHub Pages.
 
 ```
 index.html
 assets/
   css/        base · layout · components · pages · booking · print
   js/
-    app.js            точка входа и маршруты
-    router.js         hash-маршрутизатор (#/film/f04)
-    store.js          состояние: localStorage + память
+    app.js            entry point and routes
+    router.js         hash router (#/film/f04)
+    store.js          state: localStorage + memory
     services/
-      api.js          демо-API: фильмы, сеансы, заказы, пользователи, отзывы
-      schedule.js     генерация расписания, цен и занятости мест
-    data/             фильмы, залы, акции, контакты, FAQ
-    components/       постеры (SVG), карточки, билет, плеер, интерьеры, шапка/подвал, UI
-    pages/            страницы сайта
+      api.js          demo API: films, showtimes, orders, users, reviews
+      schedule.js     generates showtimes, prices and seat occupancy
+    data/             films, rooms, offers, contacts, FAQ
+    components/       SVG posters, cards, ticket, player, interiors, header/footer, UI
+    pages/            site pages
 ```
 
-### Подключение настоящего backend
+### Connecting a real backend
 
-Все страницы получают данные только через `assets/js/services/api.js`. Функции уже асинхронные и возвращают
-структуры, как настоящий сервер, — достаточно заменить их тело на `fetch()` к вашему API.
-Платёжный шаг (`createOrder`) рассчитан на подключение реальной платёжной системы: сейчас он помечает заказ как `payment.test = true`.
+Every page gets its data only through `assets/js/services/api.js`. The functions are already async and return
+server-shaped data — replace their bodies with `fetch()` calls to your API and nothing else needs to change.
+The payment step (`createOrder`) is ready for a real payment provider; for now it marks orders with `payment.test = true`.
 
-## Запуск локально
+## Run locally
 
 ```bash
 python3 -m http.server 8000
-# открыть http://localhost:8000
+# open http://localhost:8000
 ```
 
-## Промокоды для проверки
+## Promo codes to try
 
-`FAMILY4` (от 3 мест, сеансы до 17:00) · `STUDENT30` (вторник) · `MIDNIGHT` (после 22:30) · `VIPDATE` (VIP-зал, от 2 мест) · `BIRTHDAY`
+`FAMILY4` (3+ seats, shows before 5 pm) · `STUDENT30` (Tuesdays) · `MIDNIGHT` (after 10:30 pm) · `VIPDATE` (VIP room, 2+ seats) · `BIRTHDAY`

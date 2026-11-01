@@ -1,4 +1,4 @@
-// Набор линейных иконок (оригинальные, рисованы под стиль сайта).
+// Line icon set (original, drawn to match the site style).
 
 const s = (body, vb = '0 0 24 24') =>
   `<svg viewBox="${vb}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;

@@ -1,5 +1,5 @@
-// Векторные «фотографии» интерьера: зал, фойе, бар, VIP-зал.
-// Рисуются кодом, поэтому выглядят чётко на любом экране и не требуют загрузки картинок.
+// Vector interior “photos”: auditorium, lobby, bar, VIP room.
+// Drawn in code, so they stay crisp on any screen and need no image downloads.
 
 import { rng } from '../lib/rand.js';
 
@@ -18,8 +18,8 @@ function defs(id, tone = '#3a0c12') {
   </defs>`;
 }
 
-/** Кинозал в перспективе: экран, ряды кресел, бра на стенах. */
-export function hallScene({ tone = '#5a0f17', gold = false, rows = 7, label = 'Интерьер кинозала' } = {}) {
+/** Auditorium in perspective: screen, rows of seats, wall sconces. */
+export function hallScene({ tone = '#5a0f17', gold = false, rows = 7, label = 'Auditorium interior' } = {}) {
   const id = `ill${++uid}`;
   const random = rng(`hall|${tone}|${rows}`);
   let seats = '';
@@ -63,7 +63,7 @@ export function hallScene({ tone = '#5a0f17', gold = false, rows = 7, label = '�
   </svg>`;
 }
 
-/** Фойе с латунными светильниками и афишами. */
+/** Lobby with brass lamps and posters. */
 export function lobbyScene() {
   const id = `ill${++uid}`;
   const posters = [0, 1, 2, 3].map((i) => {
@@ -75,7 +75,7 @@ export function lobbyScene() {
       <ellipse cx="${x + 60}" cy="120" rx="70" ry="40" fill="url(#${id}-lamp)" opacity="0.7"/>
       <rect x="${x + 50}" y="112" width="20" height="10" rx="3" fill="#b99a60"/>`;
   }).join('');
-  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Фойе кинотеатра">
+  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Cinema lobby">
     ${defs(id)}
     <rect width="1000" height="600" fill="url(#${id}-wall)"/>
     <rect y="0" width="1000" height="40" fill="#0a0606"/>
@@ -88,7 +88,7 @@ export function lobbyScene() {
   </svg>`;
 }
 
-/** Бар «Антракт». */
+/** The Intermission bar. */
 export function barScene() {
   const id = `ill${++uid}`;
   const random = rng('bar');
@@ -100,7 +100,7 @@ export function barScene() {
     bottles += `<rect x="${x.toFixed(1)}" y="${(shelf - h).toFixed(1)}" width="14" height="${h.toFixed(1)}" rx="4" fill="${['#3a1a10', '#4a0b12', '#1a2a20', '#2a2418'][i % 4]}" opacity="0.95"/>
       <rect x="${(x + 4).toFixed(1)}" y="${(shelf - h - 12).toFixed(1)}" width="6" height="14" fill="#1a1010"/>`;
   }
-  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Бар Антракт">
+  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Intermission bar">
     ${defs(id)}
     <rect width="1000" height="600" fill="url(#${id}-wall)"/>
     <rect x="110" y="120" width="780" height="200" fill="#120909"/>
@@ -116,7 +116,7 @@ export function barScene() {
   </svg>`;
 }
 
-/** VIP-зал: реклайнеры и столики. */
+/** VIP room: recliners and side tables. */
 export function vipScene() {
   const id = `ill${++uid}`;
   let chairs = '';
@@ -136,7 +136,7 @@ export function vipScene() {
       </g>`;
     }
   });
-  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="VIP-зал Обскура">
+  return `<svg class="illus" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Obscura VIP room">
     ${defs(id, '#3a2a18')}
     <rect width="1000" height="600" fill="url(#${id}-wall)"/>
     <rect x="270" y="70" width="460" height="190" rx="4" fill="url(#${id}-screen)" opacity="0.9"/>
@@ -148,7 +148,7 @@ export function vipScene() {
   </svg>`;
 }
 
-/** Мини-схема зала для карточек залов. */
+/** Mini seating plan for room cards. */
 export function miniMap(hall) {
   const rows = hall.rows;
   const maxSeats = Math.max(...rows.map((r) => r.seats));
@@ -164,9 +164,9 @@ export function miniMap(hall) {
       out += `<rect x="${20 + offset + (n - 1) * cell + aisle - 6}" y="${40 + ri * cell}" width="${cell - 3}" height="${cell - 3}" rx="2" fill="${vip ? '#b99a60' : '#4a3a3a'}" opacity="${vip ? 0.95 : 0.8}"/>`;
     }
   });
-  return `<svg class="mini-map" viewBox="0 0 ${w} ${h}" role="img" aria-label="Схема зала ${hall.name}">
+  return `<svg class="mini-map" viewBox="0 0 ${w} ${h}" role="img" aria-label="Seating plan for ${hall.name}">
     <path d="M${w * 0.15} 16 Q${w / 2} 6 ${w * 0.85} 16" stroke="#f2eeee" stroke-width="2.5" fill="none" opacity="0.8"/>
-    <text x="${w / 2}" y="30" text-anchor="middle" font-size="7" fill="#a49b9b" font-family="Manrope, sans-serif" letter-spacing="2">ЭКРАН</text>
+    <text x="${w / 2}" y="30" text-anchor="middle" font-size="7" fill="#a49b9b" font-family="Manrope, sans-serif" letter-spacing="2">SCREEN</text>
     ${out}
   </svg>`;
 }

@@ -1,5 +1,5 @@
-// Маршрутизатор на hash-адресах (#/film/f01). Работает на любом статическом хостинге,
-// включая GitHub Pages: обновление страницы никогда не приводит к ошибке 404.
+// Hash-based router (#/film/f01). Works on any static host, including
+// GitHub Pages: reloading a page never leads to a 404.
 
 import { createScope } from './lib/dom.js';
 
@@ -43,7 +43,7 @@ export function navigate(path, { replace = false } = {}) {
   }
 }
 
-/** Обновляет query-параметры без перерисовки страницы (для фильтров). */
+/** Updates query params without re-rendering the page (for filters). */
 export function replaceQuery(params) {
   const { path } = parseHash();
   const qs = new URLSearchParams();

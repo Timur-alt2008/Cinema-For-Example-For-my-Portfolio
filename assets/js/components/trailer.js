@@ -1,5 +1,5 @@
-// Демонстрационный трейлер: анимированный тизер на основе кадра фильма.
-// В реальном проекте здесь будет <video> или встроенный плеер — интерфейс openTrailer() не изменится.
+// Demo trailer: an animated teaser built from the film’s key art.
+// In production this becomes a <video> or embedded player — openTrailer() stays the same.
 
 import { html, esc } from '../lib/dom.js';
 import { icon } from '../icons.js';
@@ -21,23 +21,23 @@ export function trailerPlayer(film, { compact = false } = {}) {
       <div class="player__bars" aria-hidden="true"></div>
       <div class="player__beats" aria-live="off">
         ${film.trailer.beats.map((b, i) => `<p class="player__beat" data-beat="${i}">${esc(b)}</p>`)}
-        <p class="player__beat player__beat--title" data-beat="${film.trailer.beats.length}">${esc(film.title)}<small>${film.status === 'soon' ? 'Скоро в кино' : 'Уже в кино'}</small></p>
+        <p class="player__beat player__beat--title" data-beat="${film.trailer.beats.length}">${esc(film.title)}<small>${film.status === 'soon' ? 'Coming soon' : 'Now showing'}</small></p>
       </div>
-      <button class="player__big" type="button" data-play aria-label="Смотреть трейлер «${esc(film.title)}»">${icon('play')}</button>
+      <button class="player__big" type="button" data-play aria-label="Watch the ${esc(film.title)} trailer">${icon('play')}</button>
     </div>
     <div class="player__bar">
-      <button class="player__btn" type="button" data-play aria-label="Воспроизвести">${icon('play')}</button>
-      <div class="player__track" data-seek role="slider" tabindex="0" aria-label="Перемотка" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="0"><span data-progress></span></div>
+      <button class="player__btn" type="button" data-play aria-label="Play">${icon('play')}</button>
+      <div class="player__track" data-seek role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="0"><span data-progress></span></div>
       <span class="player__time tnum" data-time>0:00 / ${film.trailer.length}</span>
-      <button class="player__btn" type="button" data-mute aria-label="Звук">${icon('sound')}</button>
+      <button class="player__btn" type="button" data-mute aria-label="Sound">${icon('sound')}</button>
     </div>
-    <p class="player__note">${icon('info')} Демо-режим: вместо видео — анимированный тизер. Хронометраж трейлера ${film.trailer.length}, фильм идёт ${duration(film.duration)}.</p>
+    <p class="player__note">${icon('info')} Demo mode: an animated teaser instead of video. Trailer runtime ${film.trailer.length}, film runtime ${duration(film.duration)}.</p>
   </div>`;
 }
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
-/** Подключает логику к разметке плеера. Возвращает функцию остановки. */
+/** Wires up the player markup. Returns a stop function. */
 export function bindPlayer(root) {
   const el = root.matches?.('[data-player]') ? root : root.querySelector('[data-player]');
   if (!el) return () => {};
@@ -51,7 +51,7 @@ export function bindPlayer(root) {
   let playing = false;
   let raf = 0;
   let last = 0;
-  const SPEED = 8; // тизер проигрывается быстрее реального хронометража
+  const SPEED = 8; // the teaser plays faster than the real runtime
 
   const render = () => {
     const ratio = Math.min(1, t / total);
@@ -74,7 +74,7 @@ export function bindPlayer(root) {
   const setPlaying = (v) => {
     playing = v;
     el.classList.toggle('is-playing', v);
-    playBtns.forEach((b) => { if (b.classList.contains('player__btn')) { b.innerHTML = icon(v ? 'pause' : 'play'); b.setAttribute('aria-label', v ? 'Пауза' : 'Воспроизвести'); } });
+    playBtns.forEach((b) => { if (b.classList.contains('player__btn')) { b.innerHTML = icon(v ? 'pause' : 'play'); b.setAttribute('aria-label', v ? 'Pause' : 'Play'); } });
     if (v) {
       if (t >= total) t = 0;
       el.classList.remove('is-ended');
@@ -88,7 +88,7 @@ export function bindPlayer(root) {
     const muted = btn.dataset.muted !== '1';
     btn.dataset.muted = muted ? '1' : '0';
     btn.innerHTML = icon(muted ? 'mute' : 'sound');
-    btn.setAttribute('aria-label', muted ? 'Включить звук' : 'Выключить звук');
+    btn.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
   });
   const seek = (clientX) => {
     const rect = track.getBoundingClientRect();
@@ -108,8 +108,8 @@ export function bindPlayer(root) {
 export function openTrailer(film) {
   let stop = () => {};
   openModal({
-    title: `${esc(film.title)} <span class="muted italic" style="font-size:.6em">— трейлер</span>`,
-    label: `Трейлер фильма ${film.title}`,
+    title: `${esc(film.title)} <span class="muted italic" style="font-size:.6em">— trailer</span>`,
+    label: `${film.title} trailer`,
     wide: true,
     body: trailerPlayer(film),
     onOpen: ({ dialog }) => {

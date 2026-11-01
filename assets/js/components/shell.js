@@ -1,4 +1,4 @@
-// Шапка, мобильное меню, поиск, уведомления и подвал.
+// Header, mobile menu, search, notifications and footer.
 
 import { html, esc, $, debounce } from '../lib/dom.js';
 import { icon } from '../icons.js';
@@ -12,18 +12,18 @@ import { formatDate, relativeDays, initials } from '../lib/format.js';
 import { navigate } from '../router.js';
 
 export const NAV = [
-  { href: '#/afisha', label: 'Афиша', key: 'afisha' },
-  { href: '#/schedule', label: 'Расписание', key: 'schedule' },
-  { href: '#/halls', label: 'Залы', key: 'halls' },
-  { href: '#/promos', label: 'Акции', key: 'promos' },
-  { href: '#/about', label: 'О кинотеатре', key: 'about' },
-  { href: '#/contacts', label: 'Контакты', key: 'contacts' },
+  { href: '#/afisha', label: 'Films', key: 'afisha' },
+  { href: '#/schedule', label: 'Showtimes', key: 'schedule' },
+  { href: '#/halls', label: 'Rooms', key: 'halls' },
+  { href: '#/promos', label: 'Offers', key: 'promos' },
+  { href: '#/about', label: 'About', key: 'about' },
+  { href: '#/contacts', label: 'Contact', key: 'contacts' },
 ];
 
 export function logo() {
-  return html`<a class="logo" href="#/" aria-label="Cinema Example — на главную">
+  return html`<a class="logo" href="#/" aria-label="Cinema Example — home">
     <span class="logo__mark">${icon('logoMark')}</span>
-    <span class="logo__text"><span class="logo__name">Cinema <em>Example</em></span><span class="logo__sub">кино · полночь · страх</span></span>
+    <span class="logo__text"><span class="logo__name">Cinema <em>Example</em></span><span class="logo__sub">film · midnight · fear</span></span>
   </a>`;
 }
 
@@ -32,34 +32,34 @@ function headerHTML() {
   return html`
   <div class="wrap header__inner">
     ${logo()}
-    <nav class="nav" aria-label="Основное меню">
+    <nav class="nav" aria-label="Main menu">
       ${NAV.map((n) => `<a class="nav__link" href="${n.href}" data-nav="${n.key}">${n.label}</a>`)}
     </nav>
     <div class="header__actions">
-      <button class="icon-btn" type="button" data-open-search aria-label="Поиск фильмов">${icon('search')}</button>
+      <button class="icon-btn" type="button" data-open-search aria-label="Search films">${icon('search')}</button>
       <div class="notif-wrap">
-        <button class="icon-btn" type="button" data-notif-toggle aria-label="Уведомления о премьерах" aria-expanded="false">
+        <button class="icon-btn" type="button" data-notif-toggle aria-label="Premiere alerts" aria-expanded="false">
           ${icon('bell')}<span class="icon-btn__badge" data-notif-count></span>
         </button>
-        <div class="dropdown" data-notif-panel role="dialog" aria-label="Уведомления"></div>
+        <div class="dropdown" data-notif-panel role="dialog" aria-label="Notifications"></div>
       </div>
-      <a class="icon-btn header__fav" href="#/account/favorites" aria-label="Избранные фильмы">${icon('heart')}<span class="icon-btn__badge" data-fav-count></span></a>
+      <a class="icon-btn header__fav" href="#/account/favorites" aria-label="Favourite films">${icon('heart')}<span class="icon-btn__badge" data-fav-count></span></a>
       ${user
-        ? `<a class="header__user" href="#/account" aria-label="Личный кабинет"><span class="avatar">${esc(initials(`${user.firstName} ${user.lastName}`))}</span><span>${esc(user.firstName)}</span></a>`
-        : `<a class="header__user" href="#/login" aria-label="Войти в личный кабинет"><span class="avatar">${icon('user')}</span><span>Войти</span></a>`}
-      <a class="btn btn--primary btn--sm header__cta" href="#/schedule">${icon('ticket')} Купить билет</a>
-      <button class="icon-btn burger" type="button" data-burger aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-menu">${icon('menu')}</button>
+        ? `<a class="header__user" href="#/account" aria-label="My account"><span class="avatar">${esc(initials(`${user.firstName} ${user.lastName}`))}</span><span>${esc(user.firstName)}</span></a>`
+        : `<a class="header__user" href="#/login" aria-label="Sign in to your account"><span class="avatar">${icon('user')}</span><span>Sign in</span></a>`}
+      <a class="btn btn--primary btn--sm header__cta" href="#/schedule">${icon('ticket')} Buy tickets</a>
+      <button class="icon-btn burger" type="button" data-burger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">${icon('menu')}</button>
     </div>
   </div>
   <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
-    <nav class="mobile-menu__nav" aria-label="Мобильное меню">
-      <a class="mobile-menu__link" href="#/" data-nav="home" style="transition-delay:40ms">Главная <small>01</small></a>
+    <nav class="mobile-menu__nav" aria-label="Mobile menu">
+      <a class="mobile-menu__link" href="#/" data-nav="home" style="transition-delay:40ms">Home <small>01</small></a>
       ${NAV.map((n, i) => `<a class="mobile-menu__link" href="${n.href}" data-nav="${n.key}" style="transition-delay:${80 + i * 40}ms">${n.label} <small>0${i + 2}</small></a>`)}
-      <a class="mobile-menu__link" href="#/faq" data-nav="faq" style="transition-delay:360ms">Вопросы <small>08</small></a>
+      <a class="mobile-menu__link" href="#/faq" data-nav="faq" style="transition-delay:360ms">FAQ <small>08</small></a>
     </nav>
     <div class="mobile-menu__foot">
-      <a class="btn btn--primary btn--lg" href="#/schedule">${icon('ticket')} Купить билет</a>
-      <a class="btn btn--ghost" href="${user ? '#/account' : '#/login'}">${icon('user')} ${user ? 'Личный кабинет' : 'Войти или зарегистрироваться'}</a>
+      <a class="btn btn--primary btn--lg" href="#/schedule">${icon('ticket')} Buy tickets</a>
+      <a class="btn btn--ghost" href="${user ? '#/account' : '#/login'}">${icon('user')} ${user ? 'My account' : 'Sign in or register'}</a>
       <p class="muted" style="font-size:.82rem;text-align:center">${CINEMA.addressFull}<br>${CINEMA.phone}</p>
     </div>
   </div>`;
@@ -69,13 +69,13 @@ function notifPanelHTML() {
   const ids = premiereAlerts.list();
   const films = ids.map(getFilmById).filter(Boolean).sort((a, b) => a.premiere.localeCompare(b.premiere));
   return html`
-    <div class="dropdown__head"><span>Премьеры</span><a href="#/account/notifications" class="muted" style="letter-spacing:0;text-transform:none;font-weight:600">Настроить</a></div>
+    <div class="dropdown__head"><span>Premieres</span><a href="#/account/notifications" class="muted" style="letter-spacing:0;text-transform:none;font-weight:600">Settings</a></div>
     ${films.length
       ? films.map((f) => html`<a class="dropdown__item" href="#/film/${f.id}">
           <span class="dropdown__thumb">${poster(f, { title: false, label: false })}</span>
-          <span><b>${esc(f.title)}</b><br><span class="muted">${f.status === 'soon' ? `Премьера ${formatDate(f.premiere)} — ${relativeDays(f.premiere)}` : 'Уже в прокате — билеты в продаже'}</span></span>
+          <span><b>${esc(f.title)}</b><br><span class="muted">${f.status === 'soon' ? `Premieres ${formatDate(f.premiere)} — ${relativeDays(f.premiere)}` : 'Now showing — tickets on sale'}</span></span>
         </a>`)
-      : `<div class="dropdown__empty">Нажмите «Напомнить о премьере» у фильма из раздела «Скоро в кино» — мы сообщим, когда откроется продажа билетов.</div>`}
+      : `<div class="dropdown__empty">Tap “Remind me at premiere” on any Coming Soon film and we’ll let you know when tickets go on sale.</div>`}
   `;
 }
 
@@ -145,7 +145,7 @@ function bindHeader() {
       menu.setAttribute('aria-hidden', String(!open));
       burger.setAttribute('aria-expanded', String(open));
       burger.innerHTML = icon(open ? 'close' : 'menu');
-      burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
       document.body.classList.toggle('is-locked', open);
       return;
     }
@@ -178,19 +178,19 @@ function bindHeader() {
   store.subscribe('auth', () => { headerEl.innerHTML = headerHTML(); updateCounters(); setActiveNav(activeKey); });
 }
 
-/* ------------------------------- Поиск -------------------------------- */
+/* ------------------------------- Search ------------------------------- */
 
 export function openSearch() {
   closeMobileMenu();
   const m = openModal({
-    title: 'Поиск по афише',
+    title: 'Search films',
     wide: false,
-    label: 'Поиск фильмов',
+    label: 'Search films',
     body: html`
       <form class="search-box" data-search-form role="search">
         <div class="input-group">
           ${icon('search')}
-          <input class="input" type="search" name="q" placeholder="Название, режиссёр или актёр" autocomplete="off" autofocus aria-label="Поиск фильма">
+          <input class="input" type="search" name="q" placeholder="Title, director or actor" autocomplete="off" autofocus aria-label="Search for a film">
         </div>
       </form>
       <div class="search-results" data-search-results aria-live="polite"></div>`,
@@ -201,12 +201,12 @@ export function openSearch() {
     const q = input.value.trim();
     const list = q ? searchFilmsSync({ q }).slice(0, 6) : searchFilmsSync({ sort: 'popular' }).slice(0, 4);
     results.innerHTML = html`
-      <p class="search-results__label">${q ? (list.length ? `Найдено: ${list.length}` : '') : 'Популярно сейчас'}</p>
+      <p class="search-results__label">${q ? (list.length ? `${list.length} found` : '') : 'Popular right now'}</p>
       ${list.length ? list.map((f) => html`<a class="search-hit" href="#/film/${f.id}">
           <span class="search-hit__thumb">${poster(f, { title: false, label: false })}</span>
-          <span><b>${esc(f.title)}</b><span class="muted">${f.genreLabels.join(', ')} · ${f.age} · ${f.status === 'soon' ? `с ${formatDate(f.premiere)}` : 'в прокате'}</span></span>
+          <span><b>${esc(f.title)}</b><span class="muted">${f.genreLabels.join(', ')} · ${f.age} · ${f.status === 'soon' ? `from ${formatDate(f.premiere)}` : 'now showing'}</span></span>
           ${icon('chevronRight')}
-        </a>`) : `<div class="dropdown__empty">По запросу «${esc(q)}» ничего не нашлось. Попробуйте другое название или имя режиссёра.</div>`}`;
+        </a>`) : `<div class="dropdown__empty">Nothing found for “${esc(q)}”. Try another title or a director’s name.</div>`}`;
   };
   input.addEventListener('input', debounce(renderResults, 120));
   m.dialog.querySelector('[data-search-form]').addEventListener('submit', (e) => {
@@ -219,42 +219,42 @@ export function openSearch() {
   renderResults();
 }
 
-/* ------------------------------- Подвал ------------------------------- */
+/* ------------------------------- Footer ------------------------------- */
 
 export function renderFooter() {
   const el = document.getElementById('site-footer');
-  const words = ['Тихий дом', 'Зеркальный коридор', 'Полночный сеанс', 'Последний жилец', 'Лес не спит', 'Красная нить'];
+  const words = ['The Quiet House', 'Mirror Hall', 'Midnight Screenings', 'The Last Tenant', 'The Woods Are Awake', 'The Red Thread'];
   const track = words.map((w) => `<span>${w}<i>●</i></span>`).join('');
   el.innerHTML = html`
     <div class="footer__marquee" aria-hidden="true"><div class="footer__marquee-track">${track}${track}</div></div>
     <div class="wrap footer__grid">
       <div class="footer__about">
         ${logo()}
-        <p>Кинотеатр для тех, кто любит, когда в зале по-настоящему темно. Психологические триллеры, хорроры и большие премьеры в четырёх залах.</p>
+        <p>A cinema for people who like it truly dark in the room. Psychological thrillers, horror and big premieres across four rooms.</p>
         <div class="footer__socials">
           ${CINEMA.socials.map((s) => `<a href="#/contacts" aria-label="${s.label}: ${s.handle}" title="${s.label}">${icon(s.id)}</a>`)}
         </div>
       </div>
       <div>
-        <h3 class="footer__title">Кино</h3>
+        <h3 class="footer__title">Films</h3>
         <ul class="footer__list">
-          <li><a href="#/afisha?genre=now">Сейчас в прокате</a></li>
-          <li><a href="#/afisha?genre=soon">Скоро в кино</a></li>
-          <li><a href="#/schedule">Расписание сеансов</a></li>
-          <li><a href="#/afisha?collection=midnight">Полночный сеанс</a></li>
+          <li><a href="#/afisha?genre=now">Now showing</a></li>
+          <li><a href="#/afisha?genre=soon">Coming soon</a></li>
+          <li><a href="#/schedule">Showtimes</a></li>
+          <li><a href="#/afisha?collection=midnight">Midnight Screenings</a></li>
         </ul>
       </div>
       <div>
-        <h3 class="footer__title">Кинотеатр</h3>
+        <h3 class="footer__title">Cinema</h3>
         <ul class="footer__list">
-          <li><a href="#/about">О кинотеатре</a></li>
-          <li><a href="#/halls">Наши залы</a></li>
-          <li><a href="#/promos">Акции и скидки</a></li>
-          <li><a href="#/faq">Частые вопросы</a></li>
+          <li><a href="#/about">About us</a></li>
+          <li><a href="#/halls">Our rooms</a></li>
+          <li><a href="#/promos">Offers & discounts</a></li>
+          <li><a href="#/faq">FAQ</a></li>
         </ul>
       </div>
       <div>
-        <h3 class="footer__title">Связь</h3>
+        <h3 class="footer__title">Contact</h3>
         <ul class="footer__list">
           <li><a href="tel:${CINEMA.phoneHref}">${CINEMA.phone}</a></li>
           <li><a href="mailto:${CINEMA.email}">${CINEMA.email}</a></li>
@@ -264,7 +264,7 @@ export function renderFooter() {
       </div>
     </div>
     <div class="wrap footer__bottom">
-      <span>© ${new Date().getFullYear()} Cinema Example. Все фильмы, имена и контакты вымышлены.</span>
-      <span class="demo-note">Демонстрационный проект для портфолио · оплата в тестовом режиме</span>
+      <span>© ${new Date().getFullYear()} Cinema Example. All films, names and contacts are fictional.</span>
+      <span class="demo-note">Portfolio demo project · payments in test mode</span>
     </div>`;
 }
